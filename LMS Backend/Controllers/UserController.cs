@@ -1,0 +1,106 @@
+﻿using BusinessLogic.DTOs.User;
+using BusinessLogic.Services.Abstract;
+using Microsoft.AspNetCore.Mvc;
+using Repository.Enums.Behaviors;
+
+namespace LMS_Backend.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class UserController(
+        IUserService userService) : ControllerBase
+    {
+        private readonly IUserService _userService = userService;
+
+        [HttpGet("get")]
+        [ProducesResponseType(typeof(UserReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                if (id == 0) return BadRequest("Invalid ID");
+
+                var user = await _userService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
+                if (user == null) return NotFound($"No user found with id {id}");
+
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-all")]
+        [ProducesResponseType(typeof(IEnumerable<UserReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var users = await _userService.GetAllAsync(IncludeBehavior.AllIncludes);
+
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("post")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Post(UserCreateDto dto)
+        {
+            try
+            {
+                bool success = await _userService.CreateAsync(dto);
+
+                return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("put")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Put(UserUpdateDto dto)
+        {
+            try
+            {
+                bool success = await _userService.UpdateAsync(dto);
+
+                return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpDelete("delete")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                if (id == 0) return BadRequest("Invalid ID");
+
+                bool success = await _userService.DeleteAsync(id);
+
+                return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+    }
+}

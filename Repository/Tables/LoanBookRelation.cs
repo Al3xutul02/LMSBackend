@@ -1,0 +1,11 @@
+﻿namespace Repository.Tables
+{
+    public class LoanBookRelation
+    {
+        public int LoanId { get; set; }
+        public Loan? Loan { get; set; }
+        public int BookISBN { get; set; }
+        public Book? Book { get; set; }
+        public int Count { get; set; }
+    }
+}
