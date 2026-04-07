@@ -6,5 +6,7 @@ namespace BusinessLogic.Services.Abstract
 {
     public interface IBookService
         : IBaseService<Book, BookReadDto, BookCreateDto, BookUpdateDto>
-    { }
+    {
+        Task<BookReadDto?> GetBookDetailsAsync(int isbn);
+    }
 }

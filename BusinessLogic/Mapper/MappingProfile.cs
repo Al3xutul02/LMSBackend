@@ -28,7 +28,11 @@ namespace BusinessLogic.Mapper
             // Book Mappings
             CreateMap<Book, BookReadDto>()
                 .ForMember(dest => dest.Genres, opt =>
-                    opt.MapFrom(src => src.Genres.Select(g => g.Genre).ToList()));
+                    opt.MapFrom(src => src.Genres.Select(g => g.Genre).ToList()))
+                .ForMember(dest => dest.LoanDurationDays, opt =>
+                    opt.Equals(null))
+                .ForMember(dest => dest.CanBeReserved, opt =>
+                    opt.Equals(null));
             CreateMap<BookCreateDto, Book>()
                 .ForMember(dest => dest.Genres, opt => opt.UseDestinationValue())
                 .ForMember(dest => dest.Branches, opt => opt.UseDestinationValue())

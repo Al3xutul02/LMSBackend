@@ -2,16 +2,19 @@
 using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;
-using Repository.Enums.Types;
 
 namespace LMS_Backend.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class BookController(
-        IBookService bookService) : ControllerBase
+    public class BookController : ControllerBase
     {
-        private readonly IBookService _bookService = bookService;
+        private readonly IBookService _bookService;
+
+        public BookController(IBookService bookService)
+        {
+            _bookService = bookService;
+        }
 
         [HttpGet("get")]
         [ProducesResponseType(typeof(BookReadDto), StatusCodes.Status200OK)]
@@ -97,6 +100,27 @@ namespace LMS_Backend.Controllers
                 bool success = await _bookService.DeleteAsync(id);
 
                 return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-details/{isbn}")]
+        [ProducesResponseType(typeof(BookReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDetails(int isbn)
+        {
+            try
+            {
+                if (isbn <= 0) return BadRequest("Invalid ISBN");
+
+                var details = await _bookService.GetBookDetailsAsync(isbn);
+
+                if (details == null)
+                    return NotFound($"Book with ISBN {isbn} does not exist.");
+                return Ok(details);
             }
             catch (Exception ex)
             {

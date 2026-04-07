@@ -9,6 +9,8 @@ namespace BusinessLogic.DTOs.Book
         string Description = "",
         ICollection<BookGenreType>? Genres = null,
         int Count = 0,
-        BookStatus Status = BookStatus.InStock
+        BookStatus Status = BookStatus.InStock,
+        int? LoanDurationDays = null,
+        bool? CanBeReserved = null
         );
 }
