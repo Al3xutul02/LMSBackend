@@ -7,6 +7,6 @@ namespace BusinessLogic.DTOs.Branch
         string Name = "",
         string Address = "",
         bool IsOpen = false,
-        ICollection<BookRelationDto>? BookRelations = null
+        IEnumerable<BookRelationDto>? BookRelations = null
         );
 }

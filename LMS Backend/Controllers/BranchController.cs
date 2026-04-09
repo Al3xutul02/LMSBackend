@@ -23,7 +23,7 @@ namespace LMS_Backend.Controllers
                 if (id == 0) return BadRequest("Invalid ID");
 
                 var branch = await _branchService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
-                if (branch == null) return NotFound($"No user found with id {id}");
+                if (branch == null) return NotFound($"No branch found with id {id}");
 
                 return Ok(branch);
             }
