@@ -23,7 +23,7 @@ namespace LMS_Backend.Controllers
                 if (id == 0) return BadRequest("Invalid ID");
 
                 var loan = await _loanService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
-                if (loan == null) return NotFound($"No user found with id {id}");
+                if (loan == null) return NotFound($"No loan found with id {id}");
 
                 return Ok(loan);
             }

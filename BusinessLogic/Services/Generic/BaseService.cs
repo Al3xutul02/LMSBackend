@@ -17,6 +17,12 @@ namespace BusinessLogic.Services.Generic
         protected readonly IMapper _mapper = mapper;
         protected readonly IBaseRepository<T> _repository = repository;
 
+        // Collection of valid primary keys in the database
+        protected static readonly ISet<string> _validKeys = new HashSet<string>
+        {
+            "Id", "ISBN"
+        };
+
         public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
         {
             try
@@ -74,15 +80,17 @@ namespace BusinessLogic.Services.Generic
         }
 
         // Type cache for better performance (reflection is often slow)
-        protected static readonly PropertyInfo? _idUpdateProperty = typeof(TUpdateDto).GetProperty("Id");
+        protected static readonly IQueryable<PropertyInfo> _entityProperties = typeof(TUpdateDto).GetProperties().AsQueryable();
+        protected static readonly PropertyInfo? _key = _entityProperties.FirstOrDefault(p => _validKeys.Contains(p.Name));
         public virtual async Task<bool> UpdateAsync(TUpdateDto entityUpdateDto)
         {
-            var idValue = _idUpdateProperty?.GetValue(entityUpdateDto)
-                ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have an 'Id' property.");
+
+            var idValue = _key?.GetValue(entityUpdateDto)
+                ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have a primary key property.");
 
             int id = (int)idValue;
 
-            var existing = await _repository.GetByIdAsync(id, IncludeBehavior.NoInclude);
+            var existing = await _repository.GetByIdAsync(id, IncludeBehavior.AllIncludes);
             if (existing == null) return false;
 
             _mapper.Map(entityUpdateDto, existing);

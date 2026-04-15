@@ -7,7 +7,7 @@ namespace BusinessLogic.DTOs.Book
         string Title = "",
         string Author = "",
         string Description = "",
-        ICollection<BookGenreType>? Genres = null,
+        IEnumerable<BookGenreType>? Genres = null,
         int Count = 0,
         BookStatus Status = BookStatus.InStock
         );

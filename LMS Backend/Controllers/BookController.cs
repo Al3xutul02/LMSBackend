@@ -21,10 +21,10 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                if (id == 0) return BadRequest("Invalid ID");
+                if (id == 0) return BadRequest("Invalid ISBN");
 
                 var book = await _bookService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
-                if (book == null) return NotFound($"No user found with id {id}");
+                if (book == null) return NotFound($"No book found with ISBN {id}");
 
                 return Ok(book);
             }
@@ -123,7 +123,7 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                if (id == 0) return BadRequest("Invalid ID");
+                if (id == 0) return BadRequest("Invalid ISBN");
 
                 bool success = await _bookService.DeleteAsync(id);
 

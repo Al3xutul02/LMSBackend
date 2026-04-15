@@ -23,7 +23,7 @@ namespace LMS_Backend.Controllers
                 if (id == 0) return BadRequest("Invalid ID");
 
                 var fine = await _fineService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
-                if (fine == null) return NotFound($"No user found with id {id}");
+                if (fine == null) return NotFound($"No fine found with id {id}");
 
                 return Ok(fine);
             }

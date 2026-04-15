@@ -140,6 +140,9 @@ namespace Repository.Contexts
             modelBuilder.Entity<BranchBookRelation>(entity => {
                 entity.ToTable("BranchBookRelations");
                 entity.HasKey(e => new { e.BranchId, e.BookISBN });
+                entity.Property(e => e.Count)
+                    .IsRequired()
+                    .HasDefaultValue(0);
                 entity.HasOne(d => d.Branch).WithMany(p => p.Books)
                     .HasForeignKey(d => d.BranchId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -151,6 +154,9 @@ namespace Repository.Contexts
             modelBuilder.Entity<LoanBookRelation>(entity => {
                 entity.ToTable("LoanBookRelations");
                 entity.HasKey(e => new { e.LoanId, e.BookISBN });
+                entity.Property(e => e.Count)
+                    .IsRequired()
+                    .HasDefaultValue(1);
                 entity.HasOne(d => d.Loan).WithMany(p => p.Books)
                     .HasForeignKey(d => d.LoanId)
                     .OnDelete(DeleteBehavior.Cascade);

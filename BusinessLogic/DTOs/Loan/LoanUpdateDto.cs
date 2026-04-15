@@ -8,6 +8,6 @@ namespace BusinessLogic.DTOs.Loan
         DateTime IssueDate = new DateTime(),
         DateTime DueDate = new DateTime(),
         LoanStatus Status = LoanStatus.Active,
-        ICollection<BookRelationDto>? BookRelations = null
+        IEnumerable<BookRelationDto>? BookRelations = null
         );
 }
