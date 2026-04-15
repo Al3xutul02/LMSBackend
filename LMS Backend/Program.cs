@@ -32,6 +32,15 @@ builder.Services.AddAutoMapper(confing =>
     confing.AddProfile<MappingProfile>())
                 .AddDbContext<DatabaseContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DevelopmentConnection")!));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TestingCORSPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+    });
+});
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>()
@@ -65,6 +74,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("TestingCORSPolicy");
 
 app.UseAuthorization();
 
