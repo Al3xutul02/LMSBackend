@@ -23,7 +23,7 @@ namespace BusinessLogic.Services.Generic
             "Id", "ISBN"
         };
 
-        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace BusinessLogic.Services.Generic
             }
         }
 
-        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             IEnumerable<T> entities = await _repository.GetAllAsync(behavior, includes);
             return _mapper.Map<IEnumerable<TReadDto>>(entities);

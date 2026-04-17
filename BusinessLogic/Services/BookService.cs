@@ -19,7 +19,7 @@ namespace BusinessLogic.Services
             string? author,
             int? branchId)
         {
-            var books = await BookRepository.GetAllWithFiltersAsync(title, author, branchId, IncludeBehavior.SelectedIncludes, b => b.Genres, b => b.Branches);
+            var books = await BookRepository.GetAllWithFiltersAsync(title, author, branchId);
             return _mapper.Map<IEnumerable<BookReadDto>>(books);
         }
     }

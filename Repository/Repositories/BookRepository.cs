@@ -12,12 +12,14 @@ namespace Repository.Repositories
     public class BookRepository(DatabaseContext context)
         : BaseRepository<Book>(context), IBookRepository
     {
-        public async Task<IEnumerable<Book>> GetAllWithFiltersAsync(string? title, string? author, int? branchId,
-            IncludeBehavior behavior, params Expression<Func<Book, object>>[] includes)
+        public async Task<IEnumerable<Book>> GetAllWithFiltersAsync(string? title, string? author, int? branchId)
         {
             IQueryable<Book> query = new QueryBuilder<Book>(_dbSet)
-                .AddIncludes(includes)
-                .AddBehavior(behavior)
+                .AddIncludes(query =>
+                    query.Include(b => b.Genres)
+                        .Include(b => b.Branches).ThenInclude(br => br.Branch)
+                )
+                .AddBehavior(IncludeBehavior.SelectedIncludes)
                 .Build();
 
             if (!string.IsNullOrWhiteSpace(title))

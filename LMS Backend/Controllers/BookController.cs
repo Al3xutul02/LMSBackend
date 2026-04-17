@@ -53,33 +53,33 @@ namespace LMS_Backend.Controllers
 
  
          
-            [HttpGet("get-all-with-filters")]
-            [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
-            [ProducesResponseType(StatusCodes.Status400BadRequest)]
-            public async Task<IActionResult> SearchBooks(
-                [FromQuery] string? title,
-                [FromQuery] string? author,
-                [FromQuery] int? branchId)
+        [HttpGet("get-all-with-filters")]
+        [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SearchBooks(
+            [FromQuery] string? title,
+            [FromQuery] string? author,
+            [FromQuery] int? branchId)
+        {
+            try
             {
-                try
+                if (branchId != null && branchId <= 0)
                 {
-                    if (branchId != null && branchId <= 0)
-                    {
-                        return BadRequest("Invalid Branch Id");
-                    }
-
-                    var books = await _bookService.GetAllWithFiltersAsync(
-                        title,
-                        author,
-                        branchId);
-
-                    return Ok(books);
+                    return BadRequest("Invalid Branch Id");
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+
+                var books = await _bookService.GetAllWithFiltersAsync(
+                    title,
+                    author,
+                    branchId);
+
+                return Ok(books);
             }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
         [HttpPost("post")]

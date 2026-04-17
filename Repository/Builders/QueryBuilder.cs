@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Repository.Enums.Behaviors;
 using System.Collections;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Security.Policy;
 
 namespace Repository.Builders
 {
@@ -11,7 +13,7 @@ namespace Repository.Builders
         private readonly DbSet<T> _dbSet;
         private readonly Dictionary<IncludeBehavior, Func<IQueryable<T>>> behaviorMap;
 
-        private Expression<Func<T, object>>[]? _includes;
+        private Func<IQueryable<T>, IQueryable<T>>? _includes;
         private IncludeBehavior _behavior = IncludeBehavior.NoInclude;
 
         public QueryBuilder(DbSet<T> dbSet)
@@ -25,7 +27,7 @@ namespace Repository.Builders
             };
         }
 
-        public QueryBuilder<T> AddIncludes(Expression<Func<T, object>>[] includes)
+        public QueryBuilder<T> AddIncludes(Func<IQueryable<T>, IQueryable<T>>? includes)
         {
             _includes = includes;
             return this;
@@ -69,9 +71,9 @@ namespace Repository.Builders
         private IQueryable<T> BehaviorMapSelectedIncludes()
         {
             IQueryable<T> query = _dbSet;
-            foreach (var include in _includes!)
+            if (_includes != null)
             {
-                query = query.Include(include);
+                query = _includes(query);
             }
             return query;
         }

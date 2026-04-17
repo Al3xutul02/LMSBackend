@@ -22,7 +22,7 @@ namespace Repository.Repositories.Base
         // Type cache for better performance (reflection is often slow)
         protected static readonly IQueryable<PropertyInfo> _entityProperties = typeof(T).GetProperties().AsQueryable();
         protected static readonly string _keyName = _entityProperties.First(p => _validKeys.Contains(p.Name)).Name;
-        public virtual async Task<T?> GetByIdAsync(int id, IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<T?> GetByIdAsync(int id, IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             IQueryable<T> query = new QueryBuilder<T>(_dbSet)
                 .AddIncludes(includes)
@@ -32,7 +32,7 @@ namespace Repository.Repositories.Base
             return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, _keyName) == id);
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<IEnumerable<T>> GetAllAsync(IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             IQueryable<T> query = new QueryBuilder<T>(_dbSet)
                 .AddIncludes(includes)
