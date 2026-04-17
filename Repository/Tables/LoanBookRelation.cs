@@ -1,5 +1,8 @@
 ﻿namespace Repository.Tables
 {
+    /// <summary>
+    /// Represents data for entities in the <c>BranchBookRelations</c> intermediary table.
+    /// </summary>
     public class LoanBookRelation
     {
         public int LoanId { get; set; }

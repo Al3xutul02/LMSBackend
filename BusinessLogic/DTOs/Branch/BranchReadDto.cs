@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.DTOs.Branch
 {
+    /// <summary>
+    /// Represents a read DTO for branch entities.
+    /// </summary>
     public record BranchReadDto(
         int Id = 0,
         string Name = "",

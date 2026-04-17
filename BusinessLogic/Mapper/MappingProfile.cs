@@ -10,6 +10,9 @@ using Repository.Tables;
 
 namespace BusinessLogic.Mapper
 {
+    /// <summary>
+    /// Mapping profile for the library management system
+    /// </summary>
     public class MappingProfile : Profile
     {
         public MappingProfile()

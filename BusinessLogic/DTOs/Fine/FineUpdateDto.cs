@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.DTOs.Fine
 {
+    /// <summary>
+    /// Represents an update DTO for fine entities.
+    /// </summary>
     public record FineUpdateDto(
         int Id = 0,
         int LoanId = 0,

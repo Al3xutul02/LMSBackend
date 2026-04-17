@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.DTOs.Book
 {
+    /// <summary>
+    /// Represents a create DTO for book entities.
+    /// </summary>
     public record BookCreateDto(
         int ISBN = 0,
         string Title = "",

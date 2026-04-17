@@ -6,6 +6,10 @@ using Repository.Enums.Types;
 
 namespace LMS_Backend.Controllers
 {
+    /// <summary>
+    /// API Controller for book-related endpoints
+    /// </summary>
+    /// <param name="bookService">The book service used by the controller</param>
     [ApiController]
     [Route("[controller]")]
     public class BookController(
@@ -13,6 +17,11 @@ namespace LMS_Backend.Controllers
     {
         private readonly IBookService _bookService = bookService;
 
+        /// <summary>
+        /// Get a book after its primary key
+        /// </summary>
+        /// <param name="id">Primary key of the book</param>
+        /// <returns>Action result with the response, book read DTO if OK</returns>
         [HttpGet("get")]
         [ProducesResponseType(typeof(BookReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,6 +43,10 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all books (WARNING: Because of the large volume of data, should only be used in testing.)
+        /// </summary>
+        /// <returns>Action result with the response, book read DTO list if OK</returns>
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -51,6 +64,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a book
+        /// </summary>
+        /// <param name="dto">Create DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -68,6 +86,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a book
+        /// </summary>
+        /// <param name="dto">Update DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -85,6 +108,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a book
+        /// </summary>
+        /// <param name="id">Primary key needed for deletion</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
