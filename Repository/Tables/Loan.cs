@@ -2,6 +2,9 @@
 
 namespace Repository.Tables
 {
+    /// <summary>
+    /// Represents data for entities in the <c>Loans</c> table.
+    /// </summary>
     public class Loan
     {
         public int Id { get; set; }
@@ -12,6 +15,11 @@ namespace Repository.Tables
         public DateTime IssueDate { get; set; }
         public DateTime DueDate { get; set; }
         public LoanStatus Status { get; set; }
+
+        /// <value>
+        /// Represents relations with the intermediary table that helps
+        /// connect with the <c>Books</c> table in a many-to-many-relationship
+        /// </value>
         public ICollection<LoanBookRelation> Books { get; set; } = [];
     }
 }

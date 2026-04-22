@@ -1,11 +1,20 @@
 ﻿using AutoMapper;
 using Repository.Enums.Behaviors;
-using Repository.Repositories.Base;
+using Repository.Repositories.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace BusinessLogic.Services.Generic
 {
+    /// <summary>
+    /// The implementation of the <see cref="IBaseService{T}"/> interface
+    /// </summary>
+    /// <typeparam name="T">The class model for the repository</typeparam>
+    /// <typeparam name="TReadDto">The read DTO of the entity</typeparam>
+    /// <typeparam name="TCreateDto">The create DTO of the entity</typeparam>
+    /// <typeparam name="TUpdateDto">The update DTO of the entity</typeparam>
+    /// <param name="mapper">The mapper for the DTOs and models</param>
+    /// <param name="repository">The main repository the service communicates with</param>
     public class BaseService<T, TReadDto, TCreateDto, TUpdateDto>(
         IMapper mapper,
         IBaseRepository<T> repository) : IBaseService<T, TReadDto, TCreateDto, TUpdateDto>
@@ -23,7 +32,7 @@ namespace BusinessLogic.Services.Generic
             "Id", "ISBN"
         };
 
-        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             try
             {
@@ -38,7 +47,7 @@ namespace BusinessLogic.Services.Generic
             }
         }
 
-        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             IEnumerable<T> entities = await _repository.GetAllAsync(behavior, includes);
             return _mapper.Map<IEnumerable<TReadDto>>(entities);
@@ -50,24 +59,6 @@ namespace BusinessLogic.Services.Generic
             {
                 var entity = _mapper.Map<T>(entityCreateDto);
                 await _repository.AddAsync(entity);
-                await _repository.SaveAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return false;
-            }
-
-            return true;
-        }
-
-        public virtual async Task<bool> DeleteAsync(int id)
-        {
-            try
-            {
-                var entity = await _repository.GetByIdAsync(id, IncludeBehavior.NoInclude)
-                    ?? throw new Exception("User not found");
-                _repository.Delete(entity);
                 await _repository.SaveAsync();
             }
             catch (Exception ex)
@@ -95,6 +86,24 @@ namespace BusinessLogic.Services.Generic
 
             _mapper.Map(entityUpdateDto, existing);
             await _repository.SaveAsync();
+            return true;
+        }
+
+        public virtual async Task<bool> DeleteAsync(int id)
+        {
+            try
+            {
+                var entity = await _repository.GetByIdAsync(id, IncludeBehavior.NoInclude)
+                    ?? throw new Exception("User not found");
+                _repository.Delete(entity);
+                await _repository.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+
             return true;
         }
     }

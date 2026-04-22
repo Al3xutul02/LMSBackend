@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace Repository.Contexts
 {
+    /// <summary>
+    /// The dbcontext for the library database with all tables and relations defined
+    /// </summary>
     public class DatabaseContext : DbContext
     {
         public DbSet<User> Users => Set<User>();

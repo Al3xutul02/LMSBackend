@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.DTOs.Book
 {
+    /// <summary>
+    /// Represents a read DTO for book entities.
+    /// </summary>
     public record BookReadDto(
         int ISBN = 0,
         string Title = "",

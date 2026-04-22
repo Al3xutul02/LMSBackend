@@ -3,6 +3,9 @@ using Repository.Enums.Types;
 
 namespace BusinessLogic.DTOs.Loan
 {
+    /// <summary>
+    /// Represents a read DTO for loan entities.
+    /// </summary>
     public record LoanReadDto(
         int Id = 0,
         string LoanerName = "",
