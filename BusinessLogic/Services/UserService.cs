@@ -16,5 +16,15 @@ namespace BusinessLogic.Services
         : BaseService<User, UserReadDto, UserCreateDto, UserUpdateDto>(mapper, userRepository), IUserService
     {
         private IUserRepository UserRepository => (IUserRepository)_repository;
+
+        public async Task<UserReadDto?> GetUserProfileAsync(int userId)
+        {
+            var user = await UserRepository.GetUserForProfileAsync(userId);
+            if (user == null)
+            {
+                return null;
+            }
+            return _mapper.Map<UserReadDto>(user);
+        }
     }
 }

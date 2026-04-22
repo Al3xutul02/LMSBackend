@@ -1,4 +1,6 @@
 ﻿using BusinessLogic.DTOs.Book;
+using BusinessLogic.DTOs.User;
+using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;

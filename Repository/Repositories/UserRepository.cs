@@ -17,5 +17,14 @@ namespace Repository.Repositories
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Name == username);
         }
+
+        public async Task<User?> GetUserForProfileAsync(int userId)
+        {
+            return await _context.Users
+                .Include(u => u.Branch) 
+                .Include(u => u.Loans)
+                .AsNoTracking() 
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
     }
 }

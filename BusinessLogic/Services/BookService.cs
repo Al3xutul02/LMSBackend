@@ -2,6 +2,8 @@
 using BusinessLogic.DTOs.Book;
 using BusinessLogic.Services.Abstract;
 using BusinessLogic.Services.Generic;
+using Microsoft.EntityFrameworkCore;
+using Repository.Enums.Behaviors;
 using Repository.Repositories.Abstract;
 using Repository.Tables;
 
@@ -16,5 +18,27 @@ namespace BusinessLogic.Services
         : BaseService<Book, BookReadDto, BookCreateDto, BookUpdateDto>(mapper, bookRepository), IBookService
     {
         private IBookRepository BookRepository => (IBookRepository)_repository;
+
+        public async Task<BookReadDto?> GetBookDetailsAsync(int isbn)
+        {
+            var book = await _repository.GetByIdAsync( isbn, IncludeBehavior.AllIncludes, query => query.Include(b => b.Loans));
+            if (book == null)
+            {
+                return null;
+            }
+
+            var loanedBooks = book.Loans.Sum(l => l.Count);
+
+            var availableCopies = book.Count - loanedBooks;
+            var systemLoanPeriod = 14;
+
+            var dto = _mapper.Map<BookReadDto>(book);
+
+            return dto with
+            {
+                LoanDurationDays = systemLoanPeriod,
+                CanBeReserved = availableCopies > 0
+            };
+        }
     }
 }

@@ -9,5 +9,7 @@ namespace BusinessLogic.Services.Abstract
     /// </summary>
     public interface IUserService
         : IBaseService<User, UserReadDto, UserCreateDto, UserUpdateDto>
-    { }
+    {
+        Task<UserReadDto?> GetUserProfileAsync(int userId);
+    }
 }

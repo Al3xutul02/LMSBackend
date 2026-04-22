@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.DTOs.User;
+using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;
@@ -129,6 +130,19 @@ namespace LMS_Backend.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet("my-profile/{id}")]
+        public async Task<ActionResult<UserReadDto>> GetMyProfile(int id)
+        {
+            var profile = await _userService.GetUserProfileAsync(id);
+
+            if (profile == null)
+            {
+                return NotFound("Utilizatorul nu a fost găsit.");
+            }
+
+            return Ok(profile);
         }
     }
 }
