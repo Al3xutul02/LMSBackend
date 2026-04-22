@@ -34,11 +34,7 @@ namespace BusinessLogic.Services
 
             var dto = _mapper.Map<BookReadDto>(book);
 
-            return dto with
-            {
-                LoanDurationDays = systemLoanPeriod,
-                CanBeReserved = availableCopies > 0
-            };
+            return dto;
         }
     }
 }
