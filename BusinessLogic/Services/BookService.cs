@@ -26,6 +26,7 @@ namespace BusinessLogic.Services
                 return null;
             }
 
+
             var loanedBooks = book.Loans.Sum(l => l.Count);
 
             var availableCopies = book.Count - loanedBooks;
