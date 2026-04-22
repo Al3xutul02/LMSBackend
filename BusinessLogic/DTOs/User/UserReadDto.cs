@@ -2,6 +2,9 @@
 
 namespace BusinessLogic.DTOs.User
 {
+    /// <summary>
+    /// Represents a read DTO for user entities.
+    /// </summary>
     public record UserReadDto(
         int Id = 0,
         string Name = "",

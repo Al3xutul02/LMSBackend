@@ -3,6 +3,9 @@ using Repository.Enums.Types;
 
 namespace BusinessLogic.DTOs.Loan
 {
+    /// <summary>
+    /// Represents a read DTO for loan entities.
+    /// </summary>
     public record LoanReadDto(
         int Id = 0,
         string LoanerName = "",
@@ -10,6 +13,6 @@ namespace BusinessLogic.DTOs.Loan
         DateTime IssueDate = new DateTime(),
         DateTime DueDate = new DateTime(),
         LoanStatus Status = LoanStatus.Active,
-        ICollection<BookRelationDto>? BookRelations = null
+        IEnumerable<BookRelationDto>? BookRelations = null
         );
 }

@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json.Converters;
-using System.Text.Json.Serialization;
-
-namespace Repository.Enums.Types
+﻿namespace Repository.Enums.Types
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    /// <summary>
+    /// Enum type for possible book genres
+    /// </summary>
     public enum BookGenreType
     {
        Action,

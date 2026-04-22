@@ -7,6 +7,11 @@ using Repository.Tables;
 
 namespace BusinessLogic.Services
 {
+    /// <summary>
+    /// The implementation of the <see cref="ILoanService"/> interface
+    /// </summary>
+    /// <param name="mapper">The mapper for the DTOs and models</param>
+    /// <param name="loanRepository">The loan repository the service communicates with</param>
     public class LoanService(IMapper mapper, ILoanRepository loanRepository)
         : BaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>(mapper, loanRepository), ILoanService
     {

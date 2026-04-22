@@ -1,11 +1,20 @@
 ﻿using AutoMapper;
 using Repository.Enums.Behaviors;
-using Repository.Repositories.Base;
+using Repository.Repositories.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
 namespace BusinessLogic.Services.Generic
 {
+    /// <summary>
+    /// The implementation of the <see cref="IBaseService{T}"/> interface
+    /// </summary>
+    /// <typeparam name="T">The class model for the repository</typeparam>
+    /// <typeparam name="TReadDto">The read DTO of the entity</typeparam>
+    /// <typeparam name="TCreateDto">The create DTO of the entity</typeparam>
+    /// <typeparam name="TUpdateDto">The update DTO of the entity</typeparam>
+    /// <param name="mapper">The mapper for the DTOs and models</param>
+    /// <param name="repository">The main repository the service communicates with</param>
     public class BaseService<T, TReadDto, TCreateDto, TUpdateDto>(
         IMapper mapper,
         IBaseRepository<T> repository) : IBaseService<T, TReadDto, TCreateDto, TUpdateDto>
@@ -17,7 +26,13 @@ namespace BusinessLogic.Services.Generic
         protected readonly IMapper _mapper = mapper;
         protected readonly IBaseRepository<T> _repository = repository;
 
-        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        // Collection of valid primary keys in the database
+        protected static readonly ISet<string> _validKeys = new HashSet<string>
+        {
+            "Id", "ISBN"
+        };
+
+        public virtual async Task<TReadDto?> GetByIdAsync(int id, IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             try
             {
@@ -32,7 +47,7 @@ namespace BusinessLogic.Services.Generic
             }
         }
 
-        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, params Expression<Func<T, object>>[] includes)
+        public virtual async Task<IEnumerable<TReadDto>> GetAllAsync(IncludeBehavior behavior, Func<IQueryable<T>, IQueryable<T>>? includes = null)
         {
             IEnumerable<T> entities = await _repository.GetAllAsync(behavior, includes);
             return _mapper.Map<IEnumerable<TReadDto>>(entities);
@@ -55,6 +70,25 @@ namespace BusinessLogic.Services.Generic
             return true;
         }
 
+        // Type cache for better performance (reflection is often slow)
+        protected static readonly IQueryable<PropertyInfo> _entityProperties = typeof(TUpdateDto).GetProperties().AsQueryable();
+        protected static readonly PropertyInfo? _key = _entityProperties.FirstOrDefault(p => _validKeys.Contains(p.Name));
+        public virtual async Task<bool> UpdateAsync(TUpdateDto entityUpdateDto)
+        {
+
+            var idValue = _key?.GetValue(entityUpdateDto)
+                ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have a primary key property.");
+
+            int id = (int)idValue;
+
+            var existing = await _repository.GetByIdAsync(id, IncludeBehavior.AllIncludes);
+            if (existing == null) return false;
+
+            _mapper.Map(entityUpdateDto, existing);
+            await _repository.SaveAsync();
+            return true;
+        }
+
         public virtual async Task<bool> DeleteAsync(int id)
         {
             try
@@ -70,23 +104,6 @@ namespace BusinessLogic.Services.Generic
                 return false;
             }
 
-            return true;
-        }
-
-        // Type cache for better performance (reflection is often slow)
-        protected static readonly PropertyInfo? _idUpdateProperty = typeof(TUpdateDto).GetProperty("Id");
-        public virtual async Task<bool> UpdateAsync(TUpdateDto entityUpdateDto)
-        {
-            var idValue = _idUpdateProperty?.GetValue(entityUpdateDto)
-                ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have an 'Id' property.");
-
-            int id = (int)idValue;
-
-            var existing = await _repository.GetByIdAsync(id, IncludeBehavior.NoInclude);
-            if (existing == null) return false;
-
-            _mapper.Map(entityUpdateDto, existing);
-            await _repository.SaveAsync();
             return true;
         }
     }

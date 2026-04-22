@@ -1,13 +1,24 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-
-namespace Repository.Enums.Types
+﻿namespace Repository.Enums.Types
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    /// <summary>
+    /// Enum type for possible fine statuses
+    /// </summary>
     public enum FineStatus
     {
+        /// <summary>
+        /// The user has paid their fine
+        /// </summary>
         Paid,
+
+        /// <summary>
+        /// The user has <b>NOT</b> paid their fine
+        /// </summary>
         Unpaid,
+
+        /// <summary>
+        /// The fine has been waived by a librarian or administrator
+        /// and does not need to be paid.
+        /// </summary>
         Waived
     }
 }

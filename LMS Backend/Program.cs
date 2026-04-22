@@ -1,8 +1,9 @@
-using AutoMapper;
 using BusinessLogic.Mapper;
 using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Repository.Contexts;
@@ -20,15 +21,26 @@ builder.Services.AddControllers()
             NamingStrategy = new KebabCaseNamingStrategy()
         };
         options.SerializerSettings.Converters.Add(converter);
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 builder.Services.AddSwaggerGen(c =>
     {
-        c.DescribeAllParametersInCamelCase();
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library API", Version = "v1" });
+        c.CustomSchemaIds(type => type.FullName);
     });
 builder.Services.AddAutoMapper(confing =>
     confing.AddProfile<MappingProfile>())
                 .AddDbContext<DatabaseContext>(options =>
     options.UseMySQL(builder.Configuration.GetConnectionString("DevelopmentConnection")!));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("TestingCORSPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:4200")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+    });
+});
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>()
@@ -54,9 +66,16 @@ if (app.Environment.IsDevelopment())
 {
 
     app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = string.Empty; // This makes Swagger the home page
+    });
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("TestingCORSPolicy");
 
 app.UseAuthorization();
 

@@ -6,14 +6,22 @@ using System.Linq.Expressions;
 
 namespace Repository.Builders
 {
+    /// <summary>
+    /// Builder class for streamilining database queries
+    /// </summary>
+    /// <typeparam name="T">The class model of the table that will be queried</typeparam>
     public class QueryBuilder<T> where T : class
     {
         private readonly DbSet<T> _dbSet;
         private readonly Dictionary<IncludeBehavior, Func<IQueryable<T>>> behaviorMap;
 
-        private Expression<Func<T, object>>[]? _includes;
+        private Func<IQueryable<T>, IQueryable<T>>? _includes;
         private IncludeBehavior _behavior = IncludeBehavior.NoInclude;
 
+        /// <summary>
+        /// Basic constructor for the <see cref="QueryBuilder{T}"/>
+        /// </summary>
+        /// <param name="dbSet">The table that the query will be made on</param>
         public QueryBuilder(DbSet<T> dbSet)
         {
             _dbSet = dbSet;
@@ -21,22 +29,58 @@ namespace Repository.Builders
             {
                 { IncludeBehavior.NoInclude, BehaviorMapNoIncludes },
                 { IncludeBehavior.AllIncludes, BehaviorMapAllIncludes },
-                { IncludeBehavior.SelectedIncludes, BehaviorMapSelectedIncludes }
+                { IncludeBehavior.GivenIncludes, BehaviorMapGivenIncludes }
             };
         }
 
-        public QueryBuilder<T> AddIncludes(Expression<Func<T, object>>[] includes)
+        /// <summary>
+        /// For specifying the wanted includes for the query
+        /// </summary>
+        /// <param name="includes">Function containing the query includes</param>
+        /// <returns>
+        /// The same reference of the <see cref="QueryBuilder{T}"/> that can be used
+        /// to further configure it
+        /// </returns>
+        public QueryBuilder<T> AddIncludes(Func<IQueryable<T>, IQueryable<T>>? includes)
         {
             _includes = includes;
             return this;
         }
 
+        /// <summary>
+        /// For specifying the wanted include behavior for the query
+        /// </summary>
+        /// <param name="behavior">
+        /// Enum value for the wanted behavior:
+        /// <list type="bullet">
+        /// <item> <see cref="IncludeBehavior.NoInclude"/>
+        /// <description>=> Make no joins with other tables linked with relations</description>
+        /// </item>
+        /// <item> <see cref="IncludeBehavior.AllIncludes"/>
+        /// <description>=> Attempt to make joins with all tables linked with relations</description>
+        /// </item>
+        /// <item> <see cref="IncludeBehavior.GivenIncludes"/>
+        /// <description>=> Use the joins that have been given</description>
+        /// </item>
+        /// </list>
+        /// </param>
+        /// <returns>
+        /// The same reference of the <see cref="QueryBuilder{T}"/> that can be used
+        /// to further configure it
+        /// </returns>
         public QueryBuilder<T> AddBehavior(IncludeBehavior behavior)
         {
             _behavior = behavior;
             return this;
         }
 
+        /// <summary>
+        /// Builds the final <see cref="IQueryable{T}"/>
+        /// </summary>
+        /// <returns>
+        /// The table as an <see cref="IQueryable{T}"/> with all specified
+        /// query configurations
+        /// </returns>
         public IQueryable<T> Build()
         {
             if (_includes == null)
@@ -66,12 +110,12 @@ namespace Repository.Builders
             return query;
         }
 
-        private IQueryable<T> BehaviorMapSelectedIncludes()
+        private IQueryable<T> BehaviorMapGivenIncludes()
         {
             IQueryable<T> query = _dbSet;
-            foreach (var include in _includes!)
+            if (_includes != null)
             {
-                query = query.Include(include);
+                query = _includes(query);
             }
             return query;
         }

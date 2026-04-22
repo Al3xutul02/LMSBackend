@@ -2,6 +2,9 @@
 
 namespace Repository.Tables
 {
+    /// <summary>
+    /// Represents data for entities in the <c>Users</c> table.
+    /// </summary>
     public class User
     {
         public int Id { get; set; }

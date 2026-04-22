@@ -5,6 +5,10 @@ using Repository.Enums.Behaviors;
 
 namespace LMS_Backend.Controllers
 {
+    /// <summary>
+    /// API Controller for user-related endpoints
+    /// </summary>
+    /// <param name="userService">The user service used by the controller</param>
     [ApiController]
     [Route("[controller]")]
     public class UserController(
@@ -12,6 +16,11 @@ namespace LMS_Backend.Controllers
     {
         private readonly IUserService _userService = userService;
 
+        /// <summary>
+        /// Get a user after its primary key
+        /// </summary>
+        /// <param name="id">Primary key of the user</param>
+        /// <returns>Action result with the response, user read DTO if OK</returns>
         [HttpGet("get")]
         [ProducesResponseType(typeof(UserReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,6 +42,10 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all users (WARNING: Because of the large volume of data, should only be used in testing.)
+        /// </summary>
+        /// <returns>Action result with the response, user read DTO list if OK</returns>
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<UserReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,6 +63,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a user
+        /// </summary>
+        /// <param name="dto">Create DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,6 +85,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a user
+        /// </summary>
+        /// <param name="dto">Update DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,6 +107,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a user
+        /// </summary>
+        /// <param name="id">Primary key needed for deletion</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
