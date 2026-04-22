@@ -2,6 +2,7 @@
 using BusinessLogic.DTOs.Book;
 using BusinessLogic.Services.Abstract;
 using BusinessLogic.Services.Generic;
+using Microsoft.EntityFrameworkCore;
 using Repository.Enums.Behaviors;
 using Repository.Repositories.Abstract;
 using Repository.Tables;
@@ -20,7 +21,7 @@ namespace BusinessLogic.Services
 
         public async Task<BookReadDto?> GetBookDetailsAsync(int isbn)
         {
-            var book = await _repository.GetByIdAsync(isbn, IncludeBehavior.SelectedIncludes, b => b.Loans);
+            var book = await _repository.GetByIdAsync(isbn, IncludeBehavior.AllIncludes, query => query.Include(b => b.Loans));
             if (book == null)
             {
                 return null;
