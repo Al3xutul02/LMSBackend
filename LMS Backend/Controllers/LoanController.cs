@@ -130,5 +130,29 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Get all active and overdue loans for a specific user
+        /// </summary>
+        /// <param name="userId">Primary key of the user</param>
+        /// <returns>Action result with the response, list of loan read DTOs if OK</returns>
+        [HttpGet("user-loans")]
+        [ProducesResponseType(typeof(IEnumerable<LoanReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetUserLoans(int userId)
+        {
+            try
+            {
+                if (userId == 0) return BadRequest("Invalid user ID");
+
+                var loans = await _loanService.GetUserLoansAsync(userId);
+
+                return Ok(loans);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

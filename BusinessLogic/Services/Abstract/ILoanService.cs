@@ -9,5 +9,7 @@ namespace BusinessLogic.Services.Abstract
     /// </summary>
     public interface ILoanService
         : IBaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>
-    { }
+    {
+        Task<IEnumerable<LoanReadDto>> GetUserLoansAsync(int userId);
+    }
 }

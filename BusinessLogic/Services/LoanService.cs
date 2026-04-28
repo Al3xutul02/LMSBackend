@@ -16,5 +16,11 @@ namespace BusinessLogic.Services
         : BaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>(mapper, loanRepository), ILoanService
     {
         private ILoanRepository LoanRepository => (ILoanRepository)_repository;
+
+        public async Task<IEnumerable<LoanReadDto>> GetUserLoansAsync(int userId)
+        {
+            var loans = await LoanRepository.GetUserLoansAsync(userId);
+            return _mapper.Map<IEnumerable<LoanReadDto>>(loans);
+        }
     }
 }
