@@ -1,4 +1,5 @@
-﻿using Repository.Repositories.Generic;
+﻿using Repository.Enums.Types;
+using Repository.Repositories.Base;
 using Repository.Tables;
 
 namespace Repository.Repositories.Abstract
@@ -8,5 +9,8 @@ namespace Repository.Repositories.Abstract
     /// </summary>
     public interface ILoanRepository
         : IBaseRepository<Loan>
-    { }
+    {
+        Task<IEnumerable<Loan>> GetByStatusAsync(LoanStatus status);
+        Task<bool> HasUnpaidFinesAsync(int userId);
+    }
 }
