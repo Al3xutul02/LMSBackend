@@ -15,6 +15,11 @@ namespace LMS_Backend.Controllers
     {
         private readonly IAuthService _authService = authService;
 
+        /// <summary>
+        /// Verifies the validity of a provided JWT bearer token.
+        /// </summary>
+        /// <returns>True if the token is valid; otherwise, a
+        /// 400 Bad Request if the header is missing or the token is invalid.</returns>
         [HttpGet("is-logged-in")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -41,6 +46,12 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Authenticates a user based on username and password.
+        /// </summary>
+        /// <param name="dto">The login credentials containing username and password.</param>
+        /// <returns>A <see cref="LoginResponseDto"/> containing access and refresh tokens,
+        /// or 404 if the user is not found.</returns>
         [HttpPost("login")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,6 +76,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Registers a new user in the system and automatically logs them in.
+        /// </summary>
+        /// <param name="dto">The registration details including Name, Email, and Password.</param>
+        /// <returns>A <see cref="LoginResponseDto"/> with tokens, or 400 if registration fails.</returns>
         [HttpPost("register")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -90,6 +106,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Generates a new pair of access and refresh tokens using an existing refresh token and the expired access token.
+        /// </summary>
+        /// <param name="refreshToken">The refresh token string provided by the client.</param>
+        /// <returns>A new <see cref="LoginResponseDto"/> if valid; otherwise, a 400 or 404 error.</returns>
         [HttpPost("refresh-token")]
         [ProducesResponseType(typeof(LoginResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
