@@ -8,5 +8,7 @@ namespace Repository.Repositories.Abstract
     /// </summary>
     public interface ILoanRepository
         : IBaseRepository<Loan>
-    { }
+    {
+        Task<IEnumerable<Loan>> GetUserLoansAsync(int userId);
+    }
 }
