@@ -1,7 +1,9 @@
 using BusinessLogic.Mapper;
 using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -9,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using Repository.Contexts;
 using Repository.Repositories;
 using Repository.Repositories.Abstract;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,13 +44,30 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod();
     });
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    })
+       .Services.AddAuthorization();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>()
                 .AddScoped<IBookService, BookService>()
                 .AddScoped<IBranchService, BranchService>()
                 .AddScoped<ILoanService, LoanService>()
-                .AddScoped<IFineService, FineService>();
+                .AddScoped<IFineService, FineService>()
+                .AddScoped<IAuthService, AuthService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>()
@@ -77,7 +97,10 @@ app.UseHttpsRedirection();
 
 app.UseCors("TestingCORSPolicy");
 
+app.UseAuthentication();
 app.UseAuthorization();
+// For testing authorization
+app.MapGet("/secure", () => "You are authorized!").RequireAuthorization();
 
 app.MapControllers();
 
