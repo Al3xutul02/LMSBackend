@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BusinessLogic.DTOs.Book;
+using BusinessLogic.DTOs.BorrowRequest;
 using BusinessLogic.DTOs.Branch;
 using BusinessLogic.DTOs.Fine;
 using BusinessLogic.DTOs.Loan;
@@ -7,6 +8,7 @@ using BusinessLogic.DTOs.User;
 using Microsoft.AspNetCore.Routing.Constraints;
 using Repository.Enums.Types;
 using Repository.Tables;
+using BusinessLogic.DTOs.BorrowRequest;
 
 namespace BusinessLogic.Mapper
 {
@@ -103,6 +105,19 @@ namespace BusinessLogic.Mapper
                 .ForMember(dest => dest.Loan, opt => opt.UseDestinationValue());
             CreateMap<FineUpdateDto, Fine>()
                 .ForMember(dest => dest.Loan, opt => opt.UseDestinationValue());
+
+            // BorrowRequest Mappings
+            CreateMap<BorrowRequest, BorrowRequestReadDto>()
+                .ForCtorParam("RequesterName", opt => opt.MapFrom(src =>
+                    src.User != null ? src.User.Name : "Unknown"))
+                .ForCtorParam("BookTitle", opt => opt.MapFrom(src =>
+                    src.Book != null ? src.Book.Title : "Unknown"))
+                .ForMember(dest => dest.RequesterName, opt =>
+                    opt.MapFrom(src => src.User != null ? src.User.Name : "Unknown"))
+                .ForMember(dest => dest.BookTitle, opt =>
+                    opt.MapFrom(src => src.Book != null ? src.Book.Title : "Unknown"));
+            CreateMap<BorrowRequestCreateDto, BorrowRequest>();
+            CreateMap<BorrowRequestUpdateDto, BorrowRequest>();
         }
     }
 }

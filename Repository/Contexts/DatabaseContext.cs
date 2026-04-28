@@ -18,9 +18,10 @@ namespace Repository.Contexts
         public DbSet<BookGenre> BookGenres => Set<BookGenre>();
         public DbSet<BranchBookRelation> BranchBookRelations => Set<BranchBookRelation>();
         public DbSet<LoanBookRelation> loanBookRelations => Set<LoanBookRelation>();
+        public DbSet<BorrowRequest> BorrowRequests => Set<BorrowRequest>();
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
-        : base(options)
+            : base(options)
         { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -167,13 +168,31 @@ namespace Repository.Contexts
                     .HasForeignKey(d => d.BookISBN)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<BorrowRequest>(entity => {
+                entity.ToTable("BorrowRequests");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Count).IsRequired().HasDefaultValue(1);
+                entity.Property(e => e.RequestDate).IsRequired();
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasConversion(
+                        v => ToKebabCase(v.ToString()),
+                        v => EnumParse<RequestStatus>(v)
+                    );
+                entity.HasOne(d => d.User).WithMany(p => p.BorrowRequests)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+                entity.HasOne(d => d.Book).WithMany()
+                    .HasForeignKey(d => d.BookISBN)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
-        // Helper to convert PascalCase to kebab-case
         private static string ToKebabCase(string value) =>
             Regex.Replace(value, "(?<!^)([A-Z])", "-$1").ToLower();
 
-        // Helper to convert kebab-case back to Enum
         private static T EnumParse<T>(string value) where T : struct, Enum =>
             Enum.TryParse<T>(value.Replace("-", ""), true, out var result) ? result : default;
     }

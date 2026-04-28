@@ -47,6 +47,7 @@ builder.Services.AddScoped<IUserService, UserService>()
                 .AddScoped<IBookService, BookService>()
                 .AddScoped<IBranchService, BranchService>()
                 .AddScoped<ILoanService, LoanService>()
+                .AddScoped<IBorrowRequestService, BorrowRequestService>()
                 .AddScoped<IFineService, FineService>();
 
 // Repositories
@@ -57,6 +58,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IFineRepository, FineRepository>()
                 .AddScoped<IBookGenreRepository, BookGenreRepository>()
                 .AddScoped<IBranchBookRelationRepository, BranchBookRelationRepository>()
+                .AddScoped<IBorrowRequestRepository, BorrowRequestRepository>()
                 .AddScoped<ILoanBookRelationRepository, LoanBookRelationRepository>();
 
 var app = builder.Build();
