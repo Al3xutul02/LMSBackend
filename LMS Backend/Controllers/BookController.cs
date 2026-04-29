@@ -1,5 +1,6 @@
 ﻿using BusinessLogic.DTOs.Book;
 using BusinessLogic.Services.Abstract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;
 using Repository.Enums.Types;
@@ -10,6 +11,7 @@ namespace LMS_Backend.Controllers
     /// API Controller for book-related endpoints
     /// </summary>
     /// <param name="bookService">The book service used by the controller</param>
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class BookController(
@@ -69,6 +71,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Create DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian,Administrator")]
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -91,6 +94,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Update DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian,Administrator")]
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -113,6 +117,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="id">Primary key needed for deletion</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian,Administrator")]
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
