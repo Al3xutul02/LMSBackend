@@ -4,16 +4,20 @@ using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Repository.Contexts;
 using Repository.Repositories;
 using Repository.Repositories.Abstract;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
 // Controllers and miscellaneous dependencies
 builder.Services.AddControllers()
@@ -26,11 +30,39 @@ builder.Services.AddControllers()
         options.SerializerSettings.Converters.Add(converter);
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
-builder.Services.AddSwaggerGen(c =>
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Library API", Version = "v1" });
+    options.CustomSchemaIds(type => type.FullName);
+
+    // Define the 'Bearer' security scheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library API", Version = "v1" });
-        c.CustomSchemaIds(type => type.FullName);
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",           // Must be lowercase "bearer"
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token in the text box below.\n\nExample: '12345abcdef'"
     });
+
+    // Make Swagger use that definition globally
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+                // Remove Scheme, Name, and In — they're ignored when Reference is set
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddAutoMapper(confing =>
     confing.AddProfile<MappingProfile>())
                 .AddDbContext<DatabaseContext>(options =>
