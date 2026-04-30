@@ -1,5 +1,6 @@
 ﻿using BusinessLogic.DTOs.Loan;
 using BusinessLogic.Services.Abstract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;
 
@@ -9,6 +10,7 @@ namespace LMS_Backend.Controllers
     /// API Controller for loan-related endpoints
     /// </summary>
     /// <param name="loanService">The loan service used by the controller</param>
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class LoanController(
@@ -90,6 +92,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Update DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian")]
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -112,6 +115,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="id">Primary key needed for deletion</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian")]
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

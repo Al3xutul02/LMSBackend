@@ -36,8 +36,14 @@ namespace BusinessLogic.Mapper
                     src.Genres != null
                     ? src.Genres.Select(g => g.Genre).ToList()
                     : new List<BookGenreType>()))
+                .ForCtorParam("Branches", opt => opt.MapFrom(src =>
+                    src.Branches != null
+                    ? src.Branches.Select(b => b.Branch!.Name).ToList()
+                    : new List<string>()))
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
-                    src.Genres.Select(g => g.Genre)));
+                    src.Genres.Select(g => g.Genre)))
+                .ForMember(dest => dest.Branches, opt => opt.MapFrom(src =>
+                    src.Branches.Select(b => b.Branch!.Name)));
             CreateMap<BookCreateDto, Book>()
                 .ForMember(dest => dest.Genres, opt => opt.MapFrom(src =>
                     src.Genres != null
