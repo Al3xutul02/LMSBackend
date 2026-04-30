@@ -8,5 +8,7 @@ namespace Repository.Repositories.Abstract
     /// </summary>
     public interface ILoanRepository
         : IBaseRepository<Loan>
-    { }
+    {
+        Task<Loan?> GetLoanWithDetailsAsync(int id);
+    }
 }

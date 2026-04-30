@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repository.Contexts;
+using Repository.Enums.Types;
 using Repository.Repositories.Abstract;
 using Repository.Repositories.Generic;
 using Repository.Tables;
@@ -16,6 +17,12 @@ namespace Repository.Repositories
         public async Task<User?> GetByUsernameAsync(string username)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Name == username);
+        }
+
+        public async Task<int> GetActiveLoansCountAsync(int userId)
+        {
+            return await _context.Loans
+                .CountAsync(l => l.UserId == userId && l.Status == LoanStatus.Active);
         }
     }
 }

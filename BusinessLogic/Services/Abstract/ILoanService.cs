@@ -9,5 +9,10 @@ namespace BusinessLogic.Services.Abstract
     /// </summary>
     public interface ILoanService
         : IBaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>
-    { }
+    {
+        // Metode specifice pentru fluxul de Librarian (User Story-ul tău)
+        Task<LoanDetailsDto?> GetRequestDetailsAsync(int loanId);
+        Task<bool> ApproveRequestAsync(int id);
+        Task<bool> RejectRequestAsync(int id);
+    }
 }

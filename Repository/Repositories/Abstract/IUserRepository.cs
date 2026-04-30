@@ -15,5 +15,6 @@ namespace Repository.Repositories.Abstract
         /// <param name="username">Name of the searched user</param>
         /// <returns>A task with the final result of the query</returns>
         Task<User?> GetByUsernameAsync(string username);
+        Task<int> GetActiveLoansCountAsync(int userId);
     }
 }
