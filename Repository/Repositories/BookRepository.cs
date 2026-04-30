@@ -23,7 +23,7 @@ namespace Repository.Repositories
                     query.Include(b => b.Genres)
                         .Include(b => b.Branches).ThenInclude(br => br.Branch)
                 )
-                .AddBehavior(IncludeBehavior.SelectedIncludes)
+                .AddBehavior(IncludeBehavior.GivenIncludes)
                 .Build();
 
             if (!string.IsNullOrWhiteSpace(title))

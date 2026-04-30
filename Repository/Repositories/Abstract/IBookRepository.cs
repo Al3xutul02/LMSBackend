@@ -1,5 +1,5 @@
 ﻿using Repository.Enums.Behaviors;
-using Repository.Repositories.Base;
+using Repository.Repositories.Generic;
 using Repository.Tables;
 using System.Linq.Expressions;
 
