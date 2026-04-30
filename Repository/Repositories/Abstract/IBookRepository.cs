@@ -11,6 +11,11 @@ namespace Repository.Repositories.Abstract
     public interface IBookRepository
         : IBaseRepository<Book>
     {
+        //<summary>
+        //This task involves implementing the GetAllWithFiltersAsync
+        //method within the repository or service layer.
+        //It is designed to perform flexible, asynchronous queries
+        //against the database to retrieve a specific subset of book entities.
         Task<IEnumerable<Book>> GetAllWithFiltersAsync(string? title, string? author, int? branchId);
     }
 }
