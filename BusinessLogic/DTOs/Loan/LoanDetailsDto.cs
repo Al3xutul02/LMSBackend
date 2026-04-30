@@ -9,14 +9,11 @@ namespace BusinessLogic.DTOs.Loan
          DateTime RequestDate = new DateTime(),
          DateTime? ReturnDeadline = null,
 
-         // Datele utilizatorului pentru sidebar-ul stâng
          string UserName = "",
          string UserEmail = "",
-         string UserPhone = "N/A", // Poți adăuga câmpul în entitatea User
+         string UserPhone = "N/A", 
          string UserRole = "Student",
          int ActiveLoansCount = 0,
-
-         // Lista de cărți din tabelul central
          IEnumerable<RequestedBookDto>? RequestedBooks = null,
 
          string OverallStatus = "Pending"
