@@ -1,9 +1,14 @@
 ﻿using BusinessLogic.DTOs.Book;
 using BusinessLogic.Services.Abstract;
+using Humanizer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MySqlX.XDevAPI;
 using Repository.Enums.Behaviors;
 using Repository.Enums.Types;
+using Repository.Tables;
+using System.Net;
+using ZstdSharp.Unsafe;
 
 namespace LMS_Backend.Controllers
 {
@@ -72,6 +77,45 @@ namespace LMS_Backend.Controllers
         /// <param name="dto">Create DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
         [Authorize(Roles = "Librarian,Administrator")]
+
+        //<summary>
+        //This task involves defining the API endpoints within the BookController 
+        //to handle book searching and creation.
+        //These methods act as the entry points for client requests, 
+        //delegating the core logic to the IBookService.
+
+
+        [HttpGet("get-all-with-filters")]
+        [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SearchBooks(
+            [FromQuery] string? title,
+            [FromQuery] string? author,
+            [FromQuery] int? branchId)
+        {
+            try
+            {
+                if (branchId != null && branchId <= 0)
+                {
+                    return BadRequest("Invalid Branch Id");
+                }
+
+                var books = await _bookService.GetAllWithFiltersAsync(
+                    title,
+                    author,
+                    branchId);
+
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        //<summary>
+        //This task defines the Post action within the controller, 
+        //responsible for handling the submission of new book records to the system.
+
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
