@@ -91,7 +91,7 @@ namespace BusinessLogic.Services
             var principal = GetPrincipalFromExpiredToken(oldResponse.Token);
             if (principal == null) return null;
 
-            var userIdString = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdString = principal.FindFirst("id")?.Value;
             if (!int.TryParse(userIdString, out int userId)) return null;
 
             var user = await _userRepository.GetByIdAsync(userId, IncludeBehavior.NoInclude);
@@ -120,10 +120,10 @@ namespace BusinessLogic.Services
         {
             var claims = new List<Claim>
             {
-                new (ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new (ClaimTypes.Name, user.Name),
-                new (ClaimTypes.Email, user.Email),
-                new (ClaimTypes.Role, user.Role.ToString() ?? "Reader")
+                new ("id", user.Id.ToString()),
+                new ("name", user.Name),
+                new ("email", user.Email),
+                new ("role", user.Role.ToString() ?? "Reader")
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));

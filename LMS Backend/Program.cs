@@ -11,9 +11,13 @@ using Newtonsoft.Json.Serialization;
 using Repository.Contexts;
 using Repository.Repositories;
 using Repository.Repositories.Abstract;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
 
 // Controllers and miscellaneous dependencies
 builder.Services.AddControllers()
