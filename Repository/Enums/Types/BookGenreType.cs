@@ -1,5 +1,8 @@
 ﻿namespace Repository.Enums.Types
 {
+    /// <summary>
+    /// Enum type for possible book genres
+    /// </summary>
     public enum BookGenreType
     {
        Action,

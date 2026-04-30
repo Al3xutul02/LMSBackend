@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace Repository.Contexts
 {
+    /// <summary>
+    /// The dbcontext for the library database with all tables and relations defined
+    /// </summary>
     public class DatabaseContext : DbContext
     {
         public DbSet<User> Users => Set<User>();
@@ -38,6 +41,10 @@ namespace Repository.Contexts
                 entity.Property(e => e.PasswordHash)
                     .IsRequired()
                     .HasColumnType("text");
+                entity.Property(e => e.RefreshToken)
+                    .HasDefaultValue(null);
+                entity.Property(e => e.RefreshTokenExpiryTime)
+                    .HasDefaultValue(null);
                 entity.Property(e => e.Role)
                     .IsRequired()
                     .HasConversion(

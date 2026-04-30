@@ -2,11 +2,15 @@
 using Repository.Builders;
 using Repository.Contexts;
 using Repository.Enums.Behaviors;
-using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Repository.Repositories.Base
+namespace Repository.Repositories.Generic
 {
+    /// <summary>
+    /// The implementation of the <see cref="IBaseRepository{T}"/> interface
+    /// </summary>
+    /// <typeparam name="T">The class model for the repository</typeparam>
+    /// <param name="context">The context of the database that the repository belongs to</param>
     public class BaseRepository<T>(DatabaseContext context)
         : IBaseRepository<T> where T : class
     {

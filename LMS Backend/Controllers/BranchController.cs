@@ -1,10 +1,16 @@
 ﻿using BusinessLogic.DTOs.Branch;
 using BusinessLogic.Services.Abstract;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Enums.Behaviors;
 
 namespace LMS_Backend.Controllers
 {
+    /// <summary>
+    /// API Controller for branch-related endpoints
+    /// </summary>
+    /// <param name="branchService">The branch service used by the controller</param>
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class BranchController(
@@ -12,6 +18,11 @@ namespace LMS_Backend.Controllers
     {
         private readonly IBranchService _branchService = branchService;
 
+        /// <summary>
+        /// Get a branch after its primary key
+        /// </summary>
+        /// <param name="id">Primary key of the branch</param>
+        /// <returns>Action result with the response, branch read DTO if OK</returns>
         [HttpGet("get")]
         [ProducesResponseType(typeof(BranchReadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,6 +44,10 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Get all branches (WARNING: Because of the large volume of data, should only be used in testing.)
+        /// </summary>
+        /// <returns>Action result with the response, branch read DTO list if OK</returns>
         [HttpGet("get-all")]
         [ProducesResponseType(typeof(IEnumerable<BranchReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,6 +65,12 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Create a branch
+        /// </summary>
+        /// <param name="dto">Create DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Administrator")]
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -67,6 +88,12 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Update a branch
+        /// </summary>
+        /// <param name="dto">Update DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Administrator")]
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,6 +111,12 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Delete a branch
+        /// </summary>
+        /// <param name="id">Primary key needed for deletion</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Administrator")]
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
