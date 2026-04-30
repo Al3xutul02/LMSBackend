@@ -21,7 +21,8 @@ namespace Repository.Enums.Behaviors
         /// <summary>
         /// Use the query given in the parameters
         /// </summary>
-        GivenIncludes
+        GivenIncludes,
+        NoIncludes
     }
 }
 

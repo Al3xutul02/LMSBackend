@@ -107,7 +107,24 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("stats")]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetStats()
+        {
+            try
+            {
+                var books = await _bookService.GetAllAsync(IncludeBehavior.NoInclude);
+                var totalBooks = books.Count();
+                var booksAvailable = books.Count(b => b.Status == BookStatus.InStock);
 
+                return Ok(new { totalBooks, booksAvailable });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         /// <summary>
         /// Delete a book
         /// </summary>
