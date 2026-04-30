@@ -7,7 +7,7 @@ using Repository.Enums.Types;
 namespace LMS_Backend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("borrow-request")]
     public class BorrowRequestController(IBorrowRequestService borrowRequestService) : ControllerBase
     {
         private readonly IBorrowRequestService _borrowRequestService = borrowRequestService;
