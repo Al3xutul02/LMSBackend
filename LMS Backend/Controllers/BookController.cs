@@ -19,10 +19,14 @@ namespace LMS_Backend.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class BookController(
-        IBookService bookService) : ControllerBase
+    public class BookController : ControllerBase
     {
-        private readonly IBookService _bookService = bookService;
+        private readonly IBookService _bookService;
+
+        public BookController(IBookService bookService)
+        {
+            _bookService = bookService;
+        }
 
         /// <summary>
         /// Get a book after its primary key
@@ -71,20 +75,11 @@ namespace LMS_Backend.Controllers
             }
         }
 
-        /// <summary>
-        /// Create a book
-        /// </summary>
-        /// <param name="dto">Create DTO needed</param>
-        /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        ///<summary>
+        ///This task defines the Post action within the controller, 
+        ///responsible for handling the submission of new book records to the system.
+        ///</summary>
         [Authorize(Roles = "Librarian,Administrator")]
-
-        //<summary>
-        //This task involves defining the API endpoints within the BookController 
-        //to handle book searching and creation.
-        //These methods act as the entry points for client requests, 
-        //delegating the core logic to the IBookService.
-
-
         [HttpGet("get-all-with-filters")]
         [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -112,10 +107,12 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        //<summary>
-        //This task defines the Post action within the controller, 
-        //responsible for handling the submission of new book records to the system.
 
+        /// <summary>
+        /// Create a book
+        /// <param name="dto">Create DTO needed</param>
+        /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        /// </summary>
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -174,6 +171,32 @@ namespace LMS_Backend.Controllers
                 bool success = await _bookService.DeleteAsync(id);
 
                 return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        /// <summary>
+        /// Get book details by ISBN
+        /// <param name="isbn">ISBN of the book</param>
+        /// <returns>Action result with the book details if found</returns>
+        /// </summary>
+        [HttpGet("get-details/{isbn}")]
+        [ProducesResponseType(typeof(BookReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDetails(int isbn)
+        {
+            try
+            {
+                if (isbn <= 0) return BadRequest("Invalid ISBN");
+
+                var details = await _bookService.GetBookDetailsAsync(isbn);
+
+                if (details == null)
+                    return NotFound($"Book with ISBN {isbn} does not exist.");
+                return Ok(details);
             }
             catch (Exception ex)
             {
