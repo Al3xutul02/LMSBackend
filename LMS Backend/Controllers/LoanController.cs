@@ -129,5 +129,19 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("user-loans/{userId}")]
+        public async Task<IActionResult> GetUserLoans(int userId)
+        {
+            try
+            {
+                var loans = await _loanService.GetLoansByUserIdAsync(userId);
+                return Ok(loans);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

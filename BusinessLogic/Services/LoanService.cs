@@ -81,5 +81,22 @@ namespace BusinessLogic.Services
 
             return _mapper.Map<LoanReadDto>(loan);
         }
+
+        public async Task<IEnumerable<LoanReadDto>> GetLoansByUserIdAsync(int userId)
+        {
+            // GetAllAsync primește (behavior, includes) conform IBaseRepository
+            var allLoans = await LoanRepository.GetAllAsync(
+                IncludeBehavior.AllIncludes,
+                null
+            );
+
+            if (allLoans == null) return Enumerable.Empty<LoanReadDto>();
+
+            // Filtrarea trebuie făcută după ce ai descărcat datele, 
+            // deoarece IBaseRepository nu are metodă de filtrare (Where).
+            var userLoans = allLoans.Where(l => l.UserId == userId);
+
+            return _mapper.Map<IEnumerable<LoanReadDto>>(userLoans);
+        }
     }
 }
