@@ -11,5 +11,7 @@ namespace Repository.Repositories
     /// <param name="context">The context of the database that the repository belongs to</param>
     public class LoanBookRelationRepository(DatabaseContext context)
         : BaseRepository<LoanBookRelation>(context), ILoanBookRelationRepository
-    { }
+    {
+        
+    }
 }

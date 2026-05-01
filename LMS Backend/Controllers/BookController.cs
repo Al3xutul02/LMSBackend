@@ -2,9 +2,15 @@
 using BusinessLogic.DTOs.User;
 using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
+using Humanizer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MySqlX.XDevAPI;
 using Repository.Enums.Behaviors;
 using Repository.Enums.Types;
+using Repository.Tables;
+using System.Net;
+using ZstdSharp.Unsafe;
 
 namespace LMS_Backend.Controllers
 {
@@ -12,12 +18,17 @@ namespace LMS_Backend.Controllers
     /// API Controller for book-related endpoints
     /// </summary>
     /// <param name="bookService">The book service used by the controller</param>
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class BookController(
-        IBookService bookService) : ControllerBase
+    public class BookController : ControllerBase
     {
-        private readonly IBookService _bookService = bookService;
+        private readonly IBookService _bookService;
+
+        public BookController(IBookService bookService)
+        {
+            _bookService = bookService;
+        }
 
         /// <summary>
         /// Get a book after its primary key
@@ -66,11 +77,44 @@ namespace LMS_Backend.Controllers
             }
         }
 
+        ///<summary>
+        ///This task defines the Post action within the controller, 
+        ///responsible for handling the submission of new book records to the system.
+        ///</summary>
+        [Authorize(Roles = "Librarian,Administrator")]
+        [HttpGet("get-all-with-filters")]
+        [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> SearchBooks(
+            [FromQuery] string? title,
+            [FromQuery] string? author,
+            [FromQuery] int? branchId)
+        {
+            try
+            {
+                if (branchId != null && branchId <= 0)
+                {
+                    return BadRequest("Invalid Branch Id");
+                }
+
+                var books = await _bookService.GetAllWithFiltersAsync(
+                    title,
+                    author,
+                    branchId);
+
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         /// <summary>
         /// Create a book
-        /// </summary>
         /// <param name="dto">Create DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        /// </summary>
         [HttpPost("post")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -93,6 +137,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Update DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian,Administrator")]
         [HttpPut("put")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -115,6 +160,7 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="id">Primary key needed for deletion</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
+        [Authorize(Roles = "Librarian,Administrator")]
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -127,6 +173,32 @@ namespace LMS_Backend.Controllers
                 bool success = await _bookService.DeleteAsync(id);
 
                 return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        
+        /// <summary>
+        /// Get book details by ISBN
+        /// <param name="isbn">ISBN of the book</param>
+        /// <returns>Action result with the book details if found</returns>
+        /// </summary>
+        [HttpGet("get-details/{isbn}")]
+        [ProducesResponseType(typeof(BookReadDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetDetails(int isbn)
+        {
+            try
+            {
+                if (isbn <= 0) return BadRequest("Invalid ISBN");
+
+                var details = await _bookService.GetBookDetailsAsync(isbn);
+
+                if (details == null)
+                    return NotFound($"Book with ISBN {isbn} does not exist.");
+                return Ok(details);
             }
             catch (Exception ex)
             {
