@@ -41,6 +41,10 @@ namespace Repository.Contexts
                 entity.Property(e => e.PasswordHash)
                     .IsRequired()
                     .HasColumnType("text");
+                entity.Property(e => e.RefreshToken)
+                    .HasDefaultValue(null);
+                entity.Property(e => e.RefreshTokenExpiryTime)
+                    .HasDefaultValue(null);
                 entity.Property(e => e.Role)
                     .IsRequired()
                     .HasConversion(
