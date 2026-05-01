@@ -63,10 +63,19 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Create DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
-        [HttpPost("post")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Reserve([FromBody] LoanCreateDto dto, [FromQuery] DateTime pickupDate, [FromQuery] int userId)
+        [HttpPost("reserve")]
+        public async Task<IActionResult> Reserve(
+             [FromBody] LoanCreateDto dto,
+             [FromQuery] DateTime pickupDate,
+             [FromQuery] int userId)
         {
+            // Dacă datele trimise nu respectă structura LoanCreateDto, 
+            // acest bloc va returna exact câmpul care dă eroare.
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
                 var result = await _loanService.CreateReservationAsync(dto, userId, pickupDate);
@@ -77,7 +86,6 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
         /// <summary>
         /// Update a loan
         /// </summary>

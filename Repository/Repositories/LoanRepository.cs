@@ -20,8 +20,8 @@ namespace Repository.Repositories
         {
             // Păstrăm înălțimea de 70px în UI prin returnarea datelor corecte
             IQueryable<Loan> query = new QueryBuilder<Loan>(_dbSet)
-                .AddIncludes([l => l.Books])
-                .AddBehavior(IncludeBehavior.SelectedIncludes)
+                .AddIncludes(query => query.Include(l => l.Books))
+                .AddBehavior(IncludeBehavior.GivenIncludes)
                 .Build();
             return await query.Where(l => l.Status == status).ToListAsync();
         }

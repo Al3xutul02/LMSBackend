@@ -9,7 +9,10 @@ using Repository.Enums.Behaviors;
 
 namespace BusinessLogic.Services
 {
-    public class LoanService(IMapper mapper, ILoanRepository loanRepository)
+    public class LoanService(
+        IMapper mapper,
+        ILoanRepository loanRepository,
+        ILoanBookRelationRepository loanBookRelationRepository)
         : BaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>(mapper, loanRepository), ILoanService
     {
         // Accesăm repository-ul specific pentru a folosi noile metode (HasUnpaidFinesAsync, GetByStatusAsync)
@@ -27,7 +30,7 @@ namespace BusinessLogic.Services
             // 2. Mapare DTO -> Entity
             var entity = _mapper.Map<Loan>(dto);
             entity.UserId = userId;
-            entity.Status = LoanStatus.Active; // Folosim noul status pentru rezervări
+            entity.Status = LoanStatus.Pending; // Folosim noul status pentru rezervări
             entity.IssueDate = DateTime.UtcNow;
             entity.DueDate = pickupDate; // Data de ridicare stabilită în UI
 
