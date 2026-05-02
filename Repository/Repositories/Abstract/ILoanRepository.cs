@@ -10,7 +10,6 @@ namespace Repository.Repositories.Abstract
     public interface ILoanRepository
         : IBaseRepository<Loan>
     {
-        //Task GetAllAsync(Func<object, bool> value);
 
         /// <summary>
         ///  Asynchronously retrieves all loans that match the specified status.
