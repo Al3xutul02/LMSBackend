@@ -12,6 +12,7 @@ namespace BusinessLogic.DTOs.Book
         string Description = "",
         IEnumerable<BookGenreType>? Genres = null,
         int Count = 0,
-        BookStatus Status = BookStatus.InStock
+        BookStatus Status = BookStatus.InStock,
+        string ImagePath = ""
         );
 }

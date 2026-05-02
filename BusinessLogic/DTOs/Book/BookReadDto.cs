@@ -12,8 +12,9 @@ namespace BusinessLogic.DTOs.Book
         string Description = "",
         IEnumerable<BookGenreType>? Genres = null,
         int Count = 0,
-        IEnumerable<string>? Branches =  null,
+        IEnumerable<string>? Branches = null,
         BookStatus Status = BookStatus.InStock,
+        string ImagePath = "",
         int? LoanDurationDays = null,
         bool? CanBeReserved = null
         );
