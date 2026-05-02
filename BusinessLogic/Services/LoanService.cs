@@ -84,12 +84,7 @@ namespace BusinessLogic.Services
 
         public async Task<IEnumerable<LoanReadDto>> GetLoansByUserIdAsync(int userId)
         {
-            var allLoans = await LoanRepository.GetAllAsync(IncludeBehavior.AllIncludes, null);
-            var userLoans = allLoans.Where(l => l.UserId == userId).ToList();
-
-            // Dacă vrei să numeri volumele totale:
-            // var totalBooks = userLoans.Sum(l => l.BookRelations.Sum(br => br.Count));
-
+            var userLoans = await LoanRepository.GetLoansByUserIdAsync(userId);
             return _mapper.Map<IEnumerable<LoanReadDto>>(userLoans);
         }
     }

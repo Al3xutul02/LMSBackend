@@ -34,5 +34,15 @@ namespace Repository.Repositories
                                l.Fine != null &&
                                l.Fine.Status == FineStatus.Unpaid);
         }
+
+        public async Task<IEnumerable<Loan>> GetLoansByUserIdAsync(int userId)
+        {
+            return await _dbSet
+                .Include(l => l.Books)   // <-- LoanBookRelation (tabela intermediară)
+                .Include(l => l.User)
+                .Include(l => l.Fine)
+                .Where(l => l.UserId == userId)
+                .ToListAsync();
+        }
     }
 }
