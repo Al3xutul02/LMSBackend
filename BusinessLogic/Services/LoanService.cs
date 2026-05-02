@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using BusinessLogic.DTOs.Loan;
 using BusinessLogic.Services.Abstract;
 using BusinessLogic.Services.Generic;
@@ -18,16 +18,15 @@ namespace BusinessLogic.Services
         {
             if (dto.Status == LoanStatus.Returned)
             {
-                // REZOLVARE CS1501: Adăugăm 'null' pentru parametrul 'includes' care este obligatoriu în semnătură
                 var existingLoan = await _repository.GetByIdAsync(dto.Id, IncludeBehavior.NoInclude, null);
 
                 if (existingLoan != null && existingLoan.Status != LoanStatus.Returned)
                 {
+                    // Update book stock counts for each returned book
                     if (dto.BookRelations != null)
                     {
                         foreach (var relation in dto.BookRelations)
                         {
-                            // REZOLVARE CS1501: Adăugăm 'null' și aici
                             var book = await _bookRepository.GetByIdAsync(relation.ISBN, IncludeBehavior.NoInclude, null);
 
                             if (book != null)
@@ -37,18 +36,21 @@ namespace BusinessLogic.Services
                                 if (book.Count > 0 && book.Status == BookStatus.OutOfStock)
                                     book.Status = BookStatus.InStock;
 
-                                // REZOLVARE CS1061: Folosim 'Update' (metoda void), NU 'UpdateAsync'
                                 _bookRepository.Update(book);
                             }
                         }
-                        // Salvăm modificările pentru stocul cărților
                         await _bookRepository.SaveAsync();
                     }
-                    return await base.UpdateAsync(dto);
+
+                    // Update the already-tracked entity directly to avoid EF Core tracking conflict
+                    existingLoan.Status = LoanStatus.Returned;
+                    existingLoan.IssueDate = dto.IssueDate;
+                    existingLoan.DueDate = dto.DueDate;
+                    await _repository.SaveAsync();
+                    return true;
                 }
             }
 
-            // Apelăm base.UpdateAsync care se ocupă de salvarea statusului împrumutului
             return await base.UpdateAsync(dto);
         }
     }

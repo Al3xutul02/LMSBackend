@@ -95,7 +95,8 @@ namespace BusinessLogic.Mapper
                 .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue());
             CreateMap<LoanUpdateDto, Loan>()
                 .ForMember(dest => dest.User, opt => opt.UseDestinationValue())
-                .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue());
+                .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue())
+                .ForMember(dest => dest.Books, opt => opt.Ignore());
 
             // Fine Mappings
             CreateMap<Fine, FineReadDto>();
