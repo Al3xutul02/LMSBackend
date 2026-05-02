@@ -205,5 +205,35 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Retrieves a list of books filtered by genre IDs. 
+        /// If no genres are provided, returns a collection of random books.
+        /// </summary>
+        /// <param name="genres">A list of genre identifiers to filter by.</param>
+        /// <returns>
+        /// An IActionResult containing a collection of <see cref="BookReadDto"/>. 
+        /// Returns 200 OK with the books, or 400 BadRequest if an error occurs.
+        /// </returns>
+        [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
+        [HttpGet("get-by-genres")]
+        public async Task<IActionResult> GetByGenres([FromQuery] List<int> genres)
+        {
+            try
+            {
+                IEnumerable<BookReadDto> books;
+
+                if (genres == null || !genres.Any())
+                    books = await _bookService.GetRandomBooksAsync(4);
+                else
+                    books = await _bookService.GetBooksByGenresAsync(genres);
+
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

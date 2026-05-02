@@ -27,5 +27,9 @@ namespace BusinessLogic.Services.Abstract
         /// <param name="isbn">ISBN of the book</param>
         /// <returns>Book details if found, otherwise null</returns>
         Task<BookReadDto?> GetBookDetailsAsync(int isbn);
+
+        // IBookService.cs
+        Task<IEnumerable<BookReadDto>> GetBooksByGenresAsync(List<int> genres);
+        Task<IEnumerable<BookReadDto>> GetRandomBooksAsync(int count);
     }
 }
