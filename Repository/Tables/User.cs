@@ -16,6 +16,5 @@ namespace Repository.Tables
         public int? BranchId { get; set; }
         public Branch? Branch { get; set; }
         public ICollection<Loan> Loans { get; set; } = [];
-        public ICollection<BorrowRequest> BorrowRequests { get; set; } = [];
     }
 }

@@ -36,7 +36,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("TestingCORSPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:4200")
+        policy.WithOrigins(
+                    "https://localhost:4200",
+                    "http://localhost:4200"
+                )
                   .AllowAnyHeader()
                   .AllowAnyMethod();
     });
@@ -59,7 +62,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>()
                 .AddScoped<IFineRepository, FineRepository>()
                 .AddScoped<IBookGenreRepository, BookGenreRepository>()
                 .AddScoped<IBranchBookRelationRepository, BranchBookRelationRepository>()
-                .AddScoped<IBorrowRequestRepository, BorrowRequestRepository>()
                 .AddScoped<ILoanBookRelationRepository, LoanBookRelationRepository>();
 
 var app = builder.Build();
@@ -76,9 +78,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("TestingCORSPolicy");
+
+// Note: UseHttpsRedirection removed for development — HTTPS redirects break
+// cross-origin requests from the Angular dev server (browsers won't follow
+// cross-origin 301/307 redirects in CORS context). Use HTTP port 5266 directly.
 
 app.UseAuthorization();
 
