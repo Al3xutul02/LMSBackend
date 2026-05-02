@@ -6,6 +6,11 @@
     public enum LoanStatus
     {
         /// <summary>
+        /// The loan is pending approval
+        /// </summary>
+        Pending,
+
+        /// <summary>
         /// The loan is still in effect
         /// </summary>
         Active,

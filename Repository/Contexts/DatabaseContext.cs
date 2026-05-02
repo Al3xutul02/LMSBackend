@@ -18,7 +18,6 @@ namespace Repository.Contexts
         public DbSet<BookGenre> BookGenres => Set<BookGenre>();
         public DbSet<BranchBookRelation> BranchBookRelations => Set<BranchBookRelation>();
         public DbSet<LoanBookRelation> loanBookRelations => Set<LoanBookRelation>();
-        public DbSet<BorrowRequest> BorrowRequests => Set<BorrowRequest>();
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
@@ -169,25 +168,6 @@ namespace Repository.Contexts
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<BorrowRequest>(entity => {
-                entity.ToTable("BorrowRequests");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.Count).IsRequired().HasDefaultValue(1);
-                entity.Property(e => e.RequestDate).IsRequired();
-                entity.Property(e => e.Status)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<RequestStatus>(v)
-                    );
-                entity.HasOne(d => d.User).WithMany(p => p.BorrowRequests)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                entity.HasOne(d => d.Book).WithMany()
-                    .HasForeignKey(d => d.BookISBN)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
         }
 
         private static string ToKebabCase(string value) =>
