@@ -50,7 +50,7 @@ builder.Services.AddScoped<IUserService, UserService>()
                 .AddScoped<IBookService, BookService>()
                 .AddScoped<IBranchService, BranchService>()
                 .AddScoped<ILoanService, LoanService>()
-                .AddScoped<IBorrowRequestService, BorrowRequestService>()
+                //.AddScoped<IBorrowRequestService, BorrowRequestService>() // TODO: de implementat
                 .AddScoped<IFineService, FineService>()
                 .AddScoped<IInventoryService, InventoryService>();
 
