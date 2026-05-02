@@ -7,6 +7,7 @@
         int Id = 0,
         string Name = "",
         string Email = "",
-        string Password = ""
+        string Password = "",
+        string ImagePath = ""
         );
 }

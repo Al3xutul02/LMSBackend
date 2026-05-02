@@ -51,6 +51,8 @@ namespace Repository.Contexts
                         v => ToKebabCase(v.ToString()),
                         v => EnumParse<UserRole>(v)
                     );
+                entity.Property(e => e.ImagePath)
+                    .HasDefaultValue(null);
                 entity.Property(e => e.EmployeeId);
                 entity.HasOne(d => d.Branch).WithMany(p => p.Librarians)
                     .HasForeignKey(d => d.BranchId)
@@ -77,6 +79,8 @@ namespace Repository.Contexts
                         v => ToKebabCase(v.ToString()),
                         v => EnumParse<BookStatus>(v)
                     );
+                entity.Property(e => e.ImagePath)
+                    .HasDefaultValue(null);
             });
 
             modelBuilder.Entity<Branch>(entity => {
