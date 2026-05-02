@@ -48,7 +48,8 @@ builder.Services.AddScoped<IUserService, UserService>()
                 .AddScoped<IBranchService, BranchService>()
                 .AddScoped<ILoanService, LoanService>()
                 .AddScoped<IBorrowRequestService, BorrowRequestService>()
-                .AddScoped<IFineService, FineService>();
+                .AddScoped<IFineService, FineService>()
+                .AddScoped<IInventoryService, InventoryService>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>()
