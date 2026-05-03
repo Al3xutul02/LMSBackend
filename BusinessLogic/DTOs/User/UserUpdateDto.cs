@@ -7,7 +7,9 @@
         int Id = 0,
         string Name = "",
         string Email = "",
-        string Password = "",
-        string ImagePath = ""
+        string? Password = null,
+        string ImagePath = "",
+        int? EmployeeId = null,
+        int? BranchId = null
         );
 }
