@@ -13,8 +13,7 @@ namespace LMS_Backend.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class LoanController(
-        ILoanService loanService) : ControllerBase
+    public class LoanController(ILoanService loanService) : ControllerBase
     {
         private readonly ILoanService _loanService = loanService;
 
@@ -49,20 +48,14 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <returns>Action result with the response, loan read DTO list if OK</returns>
         [HttpGet("get-all")]
-        [ProducesResponseType(typeof(IEnumerable<LoanReadDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAll()
         {
             try
             {
                 var loans = await _loanService.GetAllAsync(IncludeBehavior.AllIncludes);
-
                 return Ok(loans);
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
         /// <summary>
@@ -70,23 +63,29 @@ namespace LMS_Backend.Controllers
         /// </summary>
         /// <param name="dto">Create DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
-        [HttpPost("post")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Post(LoanCreateDto dto)
+        [HttpPost("reserve")]
+        public async Task<IActionResult> Reserve(
+             [FromBody] LoanCreateDto dto,
+             [FromQuery] DateTime pickupDate,
+             [FromQuery] int userId)
         {
+            // Dacă datele trimise nu respectă structura LoanCreateDto, 
+            // acest bloc va returna exact câmpul care dă eroare.
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
-                bool success = await _loanService.CreateAsync(dto);
-
-                return Ok(success);
+                var result = await _loanService.CreateReservationAsync(dto, userId, pickupDate);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-
         /// <summary>
         /// Update a loan
         /// </summary>
@@ -100,9 +99,8 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                bool success = await _loanService.UpdateAsync(dto);
-
-                return Ok(success);
+                var reservations = await _loanService.GetActiveReservationsAsync();
+                return Ok(reservations);
             }
             catch (Exception ex)
             {
@@ -123,11 +121,8 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                if (id == 0) return BadRequest("Invalid ID");
-
-                bool success = await _loanService.DeleteAsync(id);
-
-                return Ok(success);
+                var result = await _loanService.ApproveAndActivateLoanAsync(id);
+                return Ok(result);
             }
             catch (Exception ex)
             {

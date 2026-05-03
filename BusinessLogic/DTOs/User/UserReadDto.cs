@@ -10,6 +10,7 @@ namespace BusinessLogic.DTOs.User
         string Name = "",
         string Email = "",
         UserRole Role = UserRole.Reader,
+        string ImagePath = "",
         int? EmployeeId = null,
         int? BranchId = null
         );
