@@ -9,49 +9,77 @@ using Repository.Enums.Behaviors;
 
 namespace BusinessLogic.Services
 {
-    public class LoanService(IMapper mapper, ILoanRepository loanRepository, IBookRepository bookRepository)
+    public class LoanService(
+        IMapper mapper,
+        ILoanRepository loanRepository,
+        ILoanBookRelationRepository loanBookRelationRepository)
         : BaseService<Loan, LoanReadDto, LoanCreateDto, LoanUpdateDto>(mapper, loanRepository), ILoanService
     {
-        private readonly IBookRepository _bookRepository = bookRepository;
+        // Accesăm repository-ul specific pentru a folosi noile metode (HasUnpaidFinesAsync, GetByStatusAsync)
+        private ILoanRepository LoanRepository => (ILoanRepository)_repository;
+        private readonly ILoanBookRelationRepository LoanBookRelationRepository = loanBookRelationRepository;
 
-        public override async Task<bool> UpdateAsync(LoanUpdateDto dto)
+        public async Task<bool> CreateReservationAsync(LoanCreateDto dto, int userId, DateTime pickupDate)
         {
-            if (dto.Status == LoanStatus.Returned)
+            // 1. Validare "Unwanted Customer" folosind logica mutată în Repository
+            if (await LoanRepository.HasUnpaidFinesAsync(userId))
             {
-                var existingLoan = await _repository.GetByIdAsync(dto.Id, IncludeBehavior.NoInclude, null);
-
-                if (existingLoan != null && existingLoan.Status != LoanStatus.Returned)
-                {
-                    // Update book stock counts for each returned book
-                    if (dto.BookRelations != null)
-                    {
-                        foreach (var relation in dto.BookRelations)
-                        {
-                            var book = await _bookRepository.GetByIdAsync(relation.ISBN, IncludeBehavior.NoInclude, null);
-
-                            if (book != null)
-                            {
-                                book.Count += relation.Count;
-
-                                if (book.Count > 0 && book.Status == BookStatus.OutOfStock)
-                                    book.Status = BookStatus.InStock;
-
-                                _bookRepository.Update(book);
-                            }
-                        }
-                        await _bookRepository.SaveAsync();
-                    }
-
-                    // Update the already-tracked entity directly to avoid EF Core tracking conflict
-                    existingLoan.Status = LoanStatus.Returned;
-                    existingLoan.IssueDate = dto.IssueDate;
-                    existingLoan.DueDate = dto.DueDate;
-                    await _repository.SaveAsync();
-                    return true;
-                }
+                throw new Exception("Rezervare respinsă: Utilizatorul are amenzi neplătite.");
             }
 
-            return await base.UpdateAsync(dto);
+            // 2. Mapare DTO -> Entity
+            var entity = _mapper.Map<Loan>(dto);
+            entity.UserId = userId;
+            entity.Status = LoanStatus.Pending; // Folosim noul status pentru rezervări
+            entity.IssueDate = DateTime.UtcNow;
+            entity.DueDate = pickupDate; // Data de ridicare stabilită în UI
+
+            // 3. Salvare folosind metodele din BaseRepository
+            await LoanRepository.AddAsync(entity);
+            await LoanRepository.SaveAsync();
+
+            foreach (var relation in dto.BookRelations!)
+            {
+                var loanBookRelation = new LoanBookRelation
+                {
+                    LoanId = entity.Id,
+                    BookISBN = relation.ISBN,
+                    Count = relation.Count
+                };
+                await LoanBookRelationRepository.AddAsync(loanBookRelation);
+            }
+
+            await LoanRepository.SaveAsync();
+
+            return true;
+        }
+
+        public async Task<IEnumerable<LoanReadDto>> GetActiveReservationsAsync()
+        {
+            // Preluăm doar rezervările (status Reserved) prin metoda specifică din Repository
+            var reservations = await LoanRepository.GetByStatusAsync(LoanStatus.Active);
+
+            return _mapper.Map<IEnumerable<LoanReadDto>>(reservations);
+        }
+
+        public async Task<LoanReadDto> ApproveAndActivateLoanAsync(int id)
+        {
+            // Preluăm entitatea cu toate includerile necesare
+            var loan = await LoanRepository.GetByIdAsync(id, IncludeBehavior.AllIncludes);
+
+            if (loan == null || loan.Status != LoanStatus.Active)
+                throw new Exception("Rezervarea nu a fost găsită sau este deja activă.");
+
+            // Transformăm rezervarea în împrumut activ
+            loan.Status = LoanStatus.Active;
+            loan.IssueDate = DateTime.UtcNow;
+            loan.DueDate = DateTime.UtcNow.AddDays(14); // Termen standard de 2 săptămâni
+
+            // Actualizare folosind BaseRepository
+            LoanRepository.Update(loan);
+            await LoanRepository.SaveAsync();
+
+            return _mapper.Map<LoanReadDto>(loan);
         }
     }
 }

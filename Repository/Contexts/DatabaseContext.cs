@@ -53,16 +53,42 @@ namespace Repository.Contexts
                 entity.Property(e => e.RefreshTokenExpiryTime)
                     .HasDefaultValue(null);
                 entity.Property(e => e.Role)
-                    .IsRequired();
+                    .IsRequired()
+                    .HasConversion(
+                        v => ToKebabCase(v.ToString()),
+                        v => EnumParse<UserRole>(v)
+                    );
+                entity.Property(e => e.ImagePath)
+                    .HasDefaultValue(null);
                 entity.Property(e => e.EmployeeId);
                 entity.HasOne(d => d.Branch).WithMany(p => p.Librarians)
                     .HasForeignKey(d => d.BranchId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
 
-            // ── Book primary key (ISBN, not Id) ───────────────────────────
-            modelBuilder.Entity<Book>()
-                .HasKey(b => b.ISBN);
+            modelBuilder.Entity<Book>(entity => {
+                entity.ToTable("Books");
+                entity.HasKey(e => e.ISBN);
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(150);
+                entity.Property(e => e.Author)
+                    .IsRequired()
+                    .HasMaxLength(150);
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasColumnType("text");
+                entity.Property(e => e.Count)
+                    .IsRequired();
+                entity.Property(e => e.Status)
+                    .IsRequired()
+                    .HasConversion(
+                        v => ToKebabCase(v.ToString()),
+                        v => EnumParse<BookStatus>(v)
+                    );
+                entity.Property(e => e.ImagePath)
+                    .HasDefaultValue(null);
+            });
 
             // ── Enum value converters (DB stores kebab-case strings) ───────
 
