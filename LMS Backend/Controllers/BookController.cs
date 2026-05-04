@@ -1,4 +1,6 @@
 ﻿using BusinessLogic.DTOs.Book;
+using BusinessLogic.DTOs.User;
+using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
 using Humanizer;
 using Microsoft.AspNetCore.Authorization;
@@ -79,7 +81,6 @@ namespace LMS_Backend.Controllers
         ///This task defines the Post action within the controller, 
         ///responsible for handling the submission of new book records to the system.
         ///</summary>
-        [Authorize(Roles = "Librarian,Administrator")]
         [HttpGet("get-all-with-filters")]
         [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -214,6 +215,36 @@ namespace LMS_Backend.Controllers
                 if (details == null)
                     return NotFound($"Book with ISBN {isbn} does not exist.");
                 return Ok(details);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves a list of books filtered by genre IDs. 
+        /// If no genres are provided, returns a collection of random books.
+        /// </summary>
+        /// <param name="genres">A list of genre identifiers to filter by.</param>
+        /// <returns>
+        /// An IActionResult containing a collection of <see cref="BookReadDto"/>. 
+        /// Returns 200 OK with the books, or 400 BadRequest if an error occurs.
+        /// </returns>
+        [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
+        [HttpGet("get-by-genres")]
+        public async Task<IActionResult> GetByGenres([FromQuery] List<int> genres)
+        {
+            try
+            {
+                IEnumerable<BookReadDto> books;
+
+                if (genres == null || !genres.Any())
+                    books = await _bookService.GetRandomBooksAsync(4);
+                else
+                    books = await _bookService.GetBooksByGenresAsync(genres);
+
+                return Ok(books);
             }
             catch (Exception ex)
             {

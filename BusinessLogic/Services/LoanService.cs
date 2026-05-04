@@ -81,5 +81,11 @@ namespace BusinessLogic.Services
 
             return _mapper.Map<LoanReadDto>(loan);
         }
+
+        public async Task<IEnumerable<LoanReadDto>> GetLoansByUserIdAsync(int userId)
+        {
+            var userLoans = await LoanRepository.GetLoansByUserIdAsync(userId);
+            return _mapper.Map<IEnumerable<LoanReadDto>>(userLoans);
+        }
     }
 }

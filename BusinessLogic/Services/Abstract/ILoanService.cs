@@ -35,5 +35,12 @@ namespace BusinessLogic.Services.Abstract
         /// The task result contains the <see cref="LoanReadDto"/> object representing the approved and activated loan.
         /// </returns>
         Task<LoanReadDto> ApproveAndActivateLoanAsync(int id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<IEnumerable<LoanReadDto>> GetLoansByUserIdAsync(int userId);
     }
 }

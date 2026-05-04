@@ -43,5 +43,26 @@ namespace Repository.Repositories
 
             return await query.ToListAsync();
         }
+
+        // În BookRepository.cs
+        public async Task<IEnumerable<Book>> GetByGenresAsync(List<int> genres)
+        {
+            return await _dbSet
+                .Include(b => b.Genres)
+                .Include(b => b.Branches).ThenInclude(br => br.Branch)
+                .Where(b => b.Genres.Any(g => genres.Contains((int)g.Genre)))
+                .Take(4)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Book>> GetRandomAsync(int count)
+        {
+            return await _dbSet
+                .Include(b => b.Genres)
+                .Include(b => b.Branches).ThenInclude(br => br.Branch)
+                .OrderBy(b => Guid.NewGuid()) // random order
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }

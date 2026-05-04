@@ -9,7 +9,8 @@ namespace Repository.Repositories.Abstract
     /// </summary>
     public interface ILoanRepository
         : IBaseRepository<Loan>
-    {   
+    {
+
         /// <summary>
         ///  Asynchronously retrieves all loans that match the specified status.
         /// </summary>
@@ -24,5 +25,6 @@ namespace Repository.Repositories.Abstract
         /// <returns>A task that represents the asynchronous operation. The task result contains <see langword="true"/> if the
         /// user has unpaid fines; otherwise, <see langword="false"/>.</returns>
         Task<bool> HasUnpaidFinesAsync(int userId);
+        Task<IEnumerable<Loan>> GetLoansByUserIdAsync(int userId);
     }
 }

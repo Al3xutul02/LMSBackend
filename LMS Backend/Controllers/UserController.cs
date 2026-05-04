@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.DTOs.User;
+using BusinessLogic.Services;
 using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +129,38 @@ namespace LMS_Backend.Controllers
                 bool success = await _userService.DeleteAsync(id);
 
                 return Ok(success);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("my-profile/{id}")]
+        public async Task<ActionResult<UserReadDto>> GetMyProfile(int id)
+        {
+            var profile = await _userService.GetUserProfileAsync(id);
+
+            if (profile == null)
+            {
+                return NotFound("Utilizatorul nu a fost găsit.");
+            }
+
+            return Ok(profile);
+        }
+
+        [HttpPut("update-name/{id}")]
+        public async Task<IActionResult> UpdateName(int id, [FromBody] string newName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newName))
+                    return BadRequest("Numele nu poate fi gol.");
+
+                var result = await _userService.UpdateNameAsync(id, newName);
+                if (!result) return NotFound("Utilizatorul nu a fost găsit.");
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
