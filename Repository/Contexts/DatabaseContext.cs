@@ -53,16 +53,16 @@ namespace Repository.Contexts
                 entity.Property(e => e.RefreshTokenExpiryTime)
                     .HasDefaultValue(null);
                 entity.Property(e => e.Role)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<UserRole>(v)
-                    );
+                    .IsRequired();
                 entity.Property(e => e.EmployeeId);
                 entity.HasOne(d => d.Branch).WithMany(p => p.Librarians)
                     .HasForeignKey(d => d.BranchId)
                     .OnDelete(DeleteBehavior.SetNull);
             });
+
+            // ── Book primary key (ISBN, not Id) ───────────────────────────
+            modelBuilder.Entity<Book>()
+                .HasKey(b => b.ISBN);
 
             // ── Enum value converters (DB stores kebab-case strings) ───────
 
