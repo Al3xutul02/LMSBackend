@@ -23,11 +23,6 @@
         /// <summary>
         /// The books have been retured, either on time or after the due date
         /// </summary>
-        Returned,
-
-        /// <summary>
-        /// The loan is waiting to be approved by a librarian
-        /// </summary>
-        Pending
+        Returned
     }
 }
