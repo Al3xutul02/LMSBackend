@@ -73,22 +73,30 @@ namespace BusinessLogic.Services.Generic
         // Type cache for better performance (reflection is often slow)
         protected static readonly IQueryable<PropertyInfo> _entityProperties = typeof(TUpdateDto).GetProperties().AsQueryable();
         protected static readonly PropertyInfo? _key = _entityProperties.FirstOrDefault(p => _validKeys.Contains(p.Name));
-        public virtual async Task<bool> UpdateAsync(TUpdateDto entityUpdateDto)
+        //public virtual async Task<bool> UpdateAsync(TUpdateDto entityUpdateDto)
+        //{
+
+        //    var idValue = _key?.GetValue(entityUpdateDto)
+        //        ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have a primary key property.");
+
+        //    int id = (int)idValue;
+
+        //    var existing = await _repository.GetByIdAsync(id, IncludeBehavior.AllIncludes);
+        //    if (existing == null) return false;
+
+        //    _mapper.Map(entityUpdateDto, existing);
+        //    await _repository.SaveAsync();
+        //    return true;
+        //}
+        public virtual async Task<bool> UpdateAsync(TUpdateDto dto)
         {
 
-            var idValue = _key?.GetValue(entityUpdateDto)
-                ?? throw new ArgumentException($"DTO {typeof(TUpdateDto).Name} must have a primary key property.");
-
-            int id = (int)idValue;
-
-            var existing = await _repository.GetByIdAsync(id, IncludeBehavior.AllIncludes);
-            if (existing == null) return false;
-
-            _mapper.Map(entityUpdateDto, existing);
+            var entity = _mapper.Map<T>(dto);
+            _repository.Update(entity);
             await _repository.SaveAsync();
+
             return true;
         }
-
         public virtual async Task<bool> DeleteAsync(int id)
         {
             try

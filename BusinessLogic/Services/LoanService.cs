@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using BusinessLogic.DTOs.Loan;
 using BusinessLogic.Services.Abstract;
 using BusinessLogic.Services.Generic;

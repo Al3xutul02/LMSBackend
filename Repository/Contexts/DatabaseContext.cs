@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Repository.Enums.Types;
 using Repository.Tables;
 using System.Text.RegularExpressions;

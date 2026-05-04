@@ -85,7 +85,7 @@ namespace Repository.Builders
         /// </returns>
         public IQueryable<T> Build()
         {
-            if (_includes == null)
+            if (_includes == null && _behavior != IncludeBehavior.AllIncludes)
             {
                 return BehaviorMapNoIncludes();
             }

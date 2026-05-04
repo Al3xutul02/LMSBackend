@@ -33,7 +33,7 @@ namespace LMS_Backend.Controllers
             {
                 if (id == 0) return BadRequest("Invalid ID");
 
-                var fine = await _fineService.GetByIdAsync(id, IncludeBehavior.AllIncludes);
+                var fine = await _fineService.GetByIdAsync(id, IncludeBehavior.NoInclude);
                 if (fine == null) return NotFound($"No fine found with id {id}");
 
                 return Ok(fine);
@@ -55,7 +55,7 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                var fines = await _fineService.GetAllAsync(IncludeBehavior.AllIncludes);
+                var fines = await _fineService.GetAllAsync(IncludeBehavior.NoInclude);
 
                 return Ok(fines);
             }
