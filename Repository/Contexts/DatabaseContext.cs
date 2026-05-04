@@ -34,9 +34,35 @@ namespace Repository.Contexts
         {
             base.OnModelCreating(modelBuilder);
 
-            // ── Book primary key (ISBN, not the conventional Id) ───────────
-            modelBuilder.Entity<Book>()
-                .HasKey(b => b.ISBN);
+            modelBuilder.Entity<User>(entity => {
+                entity.ToTable("Users");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
+                entity.Property(e => e.PasswordHash)
+                    .IsRequired()
+                    .HasColumnType("text");
+                entity.Property(e => e.RefreshToken)
+                    .HasDefaultValue(null);
+                entity.Property(e => e.RefreshTokenExpiryTime)
+                    .HasDefaultValue(null);
+                entity.Property(e => e.Role)
+                    .IsRequired()
+                    .HasConversion(
+                        v => ToKebabCase(v.ToString()),
+                        v => EnumParse<UserRole>(v)
+                    );
+                entity.Property(e => e.EmployeeId);
+                entity.HasOne(d => d.Branch).WithMany(p => p.Librarians)
+                    .HasForeignKey(d => d.BranchId)
+                    .OnDelete(DeleteBehavior.SetNull);
+            });
 
             // ── Enum value converters (DB stores kebab-case strings) ───────
 
