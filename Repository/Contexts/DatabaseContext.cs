@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository.Enums.Types;
 using Repository.Tables;
 using System.Text.RegularExpressions;
@@ -6,174 +7,91 @@ using System.Text.RegularExpressions;
 namespace Repository.Contexts
 {
     /// <summary>
-    /// The dbcontext for the library database with all tables and relations defined
+    /// The Entity Framework Core database context for the Library Management System.
     /// </summary>
-    public class DatabaseContext : DbContext
+    public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbContext(options)
     {
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Book> Books => Set<Book>();
-        public DbSet<Branch> Branches => Set<Branch>();
-        public DbSet<Loan> Loans => Set<Loan>();
-        public DbSet<Fine> Fines => Set<Fine>();
-        public DbSet<BookGenre> BookGenres => Set<BookGenre>();
-        public DbSet<BranchBookRelation> BranchBookRelations => Set<BranchBookRelation>();
-        public DbSet<LoanBookRelation> loanBookRelations => Set<LoanBookRelation>();
+        public DbSet<Loan>               Loans               { get; set; }
+        public DbSet<Fine>               Fines               { get; set; }
+        public DbSet<Book>               Books               { get; set; }
+        public DbSet<User>               Users               { get; set; }
+        public DbSet<Branch>             Branches            { get; set; }
+        public DbSet<LoanBookRelation>   LoanBookRelations   { get; set; }
+        public DbSet<BranchBookRelation> BranchBookRelations { get; set; }
+        public DbSet<BookGenre>          BookGenres          { get; set; }
 
-        public DatabaseContext(DbContextOptions<DatabaseContext> options)
-            : base(options)
-        { }
+        // Converts PascalCase enum names to kebab-case strings for DB storage
+        // e.g. InStock → "in-stock", OutOfStock → "out-of-stock"
+        private static string ToKebab(Enum value) =>
+            Regex.Replace(value.ToString(), "([a-z])([A-Z])", "$1-$2").ToLower();
+
+        // Parses a kebab-case string back to an enum
+        // e.g. "in-stock" → remove dashes → "instock" → InStock (case-insensitive)
+        private static T FromKebab<T>(string value) where T : struct =>
+            Enum.Parse<T>(value.Replace("-", ""), ignoreCase: true);
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<User>(entity => {
-                entity.ToTable("Users");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id)
-                    .ValueGeneratedOnAdd();
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(100);
-                entity.Property(e => e.Email)
-                    .IsRequired()
-                    .HasMaxLength(100);
-                entity.Property(e => e.PasswordHash)
-                    .IsRequired()
-                    .HasColumnType("text");
-                entity.Property(e => e.Role)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<UserRole>(v)
-                    );
-                entity.Property(e => e.EmployeeId);
-                entity.HasOne(d => d.Branch).WithMany(p => p.Librarians)
-                    .HasForeignKey(d => d.BranchId)
-                    .OnDelete(DeleteBehavior.SetNull);
-            });
+            // ── Book primary key (ISBN, not the conventional Id) ───────────
+            modelBuilder.Entity<Book>()
+                .HasKey(b => b.ISBN);
 
-            modelBuilder.Entity<Book>(entity => {
-                entity.ToTable("Books");
-                entity.HasKey(e => e.ISBN);
-                entity.Property(e => e.Title)
-                    .IsRequired()
-                    .HasMaxLength(150);
-                entity.Property(e => e.Author)
-                    .IsRequired()
-                    .HasMaxLength(150);
-                entity.Property(e => e.Description)
-                    .IsRequired()
-                    .HasColumnType("text");
-                entity.Property(e => e.Count)
-                    .IsRequired();
-                entity.Property(e => e.Status)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<BookStatus>(v)
-                    );
-            });
+            // ── Enum value converters (DB stores kebab-case strings) ───────
 
-            modelBuilder.Entity<Branch>(entity => {
-                entity.ToTable("Branches");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name)
-                    .IsRequired()
-                    .HasMaxLength(150);
-                entity.Property(e => e.Address)
-                    .IsRequired()
-                    .HasMaxLength(150);
-                entity.Property(e => e.IsOpen)
-                    .IsRequired()
-                    .HasColumnType("boolean");
-            });
+            var bookStatusConverter = new ValueConverter<BookStatus, string>(
+                v => ToKebab(v),
+                v => FromKebab<BookStatus>(v));
 
-            modelBuilder.Entity<Loan>(entity => {
-                entity.ToTable("Loans");
-                entity.HasKey(e => e.Id);
-                entity.HasOne(d => d.User).WithMany(p => p.Loans)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                entity.HasOne(d => d.Fine).WithOne(p => p.Loan)
-                    .HasForeignKey<Loan>(d => d.FineId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                entity.Property(e => e.IssueDate)
-                    .IsRequired();
-                entity.Property(e => e.DueDate)
-                    .IsRequired();
-                entity.Property(e => e.Status)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<LoanStatus>(v)
-                    );
-            });
+            var loanStatusConverter = new ValueConverter<LoanStatus, string>(
+                v => ToKebab(v),
+                v => FromKebab<LoanStatus>(v));
 
-            modelBuilder.Entity<Fine>(entity => {
-                entity.ToTable("Fines");
-                entity.HasKey(e => e.Id);
-                entity.HasOne(d => d.Loan).WithOne(p => p.Fine)
-                    .HasForeignKey<Fine>(d => d.LoanId)
-                    .OnDelete(DeleteBehavior.SetNull);
-                entity.Property(e => e.Amount)
-                    .IsRequired();
-                entity.Property(e => e.Status)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<FineStatus>(v)
-                    );
-            });
+            var fineStatusConverter = new ValueConverter<FineStatus, string>(
+                v => ToKebab(v),
+                v => FromKebab<FineStatus>(v));
 
-            modelBuilder.Entity<BookGenre>(entity => {
-                entity.ToTable("BookGenres");
-                entity.HasKey(e => new { e.BookISBN, e.Genre });
-                entity.HasOne(d => d.Book).WithMany(p => p.Genres)
-                    .HasForeignKey(d => d.BookISBN)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.Property(e => e.Genre)
-                    .IsRequired()
-                    .HasConversion(
-                        v => ToKebabCase(v.ToString()),
-                        v => EnumParse<BookGenreType>(v)
-                    );
-            });
+            var userRoleConverter = new ValueConverter<UserRole, string>(
+                v => ToKebab(v),
+                v => FromKebab<UserRole>(v));
 
-            modelBuilder.Entity<BranchBookRelation>(entity => {
-                entity.ToTable("BranchBookRelations");
-                entity.HasKey(e => new { e.BranchId, e.BookISBN });
-                entity.Property(e => e.Count)
-                    .IsRequired()
-                    .HasDefaultValue(0);
-                entity.HasOne(d => d.Branch).WithMany(p => p.Books)
-                    .HasForeignKey(d => d.BranchId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(d => d.Book).WithMany(p => p.Branches)
-                    .HasForeignKey(d => d.BookISBN)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            modelBuilder.Entity<Book>()
+                .Property(b => b.Status)
+                .HasConversion(bookStatusConverter);
 
-            modelBuilder.Entity<LoanBookRelation>(entity => {
-                entity.ToTable("LoanBookRelations");
-                entity.HasKey(e => new { e.LoanId, e.BookISBN });
-                entity.Property(e => e.Count)
-                    .IsRequired()
-                    .HasDefaultValue(1);
-                entity.HasOne(d => d.Loan).WithMany(p => p.Books)
-                    .HasForeignKey(d => d.LoanId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(d => d.Book).WithMany(p => p.Loans)
-                    .HasForeignKey(d => d.BookISBN)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            modelBuilder.Entity<Loan>()
+                .Property(l => l.Status)
+                .HasConversion(loanStatusConverter);
 
+            modelBuilder.Entity<Fine>()
+                .Property(f => f.Status)
+                .HasConversion(fineStatusConverter);
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion(userRoleConverter);
+
+            // BookGenreType is stored as integer in the DB — EF default mapping handles this.
+
+            // ── Fine → Loan one-to-one relationship ───────────────────────
+            // Fine is the dependent side (owns LoanId FK).
+            // Loan.FineId is a plain column, not a second FK.
+            modelBuilder.Entity<Fine>()
+                .HasOne(f => f.Loan)
+                .WithOne(l => l.Fine)
+                .HasForeignKey<Fine>(f => f.LoanId)
+                .IsRequired(false);
+
+            // ── Composite primary keys for junction tables ─────────────────
+            modelBuilder.Entity<LoanBookRelation>()
+                .HasKey(r => new { r.LoanId, r.BookISBN });
+
+            modelBuilder.Entity<BranchBookRelation>()
+                .HasKey(r => new { r.BranchId, r.BookISBN });
+
+            modelBuilder.Entity<BookGenre>()
+                .HasKey(g => new { g.BookISBN, g.Genre });
         }
-
-        private static string ToKebabCase(string value) =>
-            Regex.Replace(value, "(?<!^)([A-Z])", "-$1").ToLower();
-
-        private static T EnumParse<T>(string value) where T : struct, Enum =>
-            Enum.TryParse<T>(value.Replace("-", ""), true, out var result) ? result : default;
     }
 }

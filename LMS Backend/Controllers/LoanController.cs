@@ -1,7 +1,9 @@
 ﻿using BusinessLogic.DTOs.Loan;
 using BusinessLogic.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Repository.Enums.Behaviors;
+using Repository.Tables;
 
 namespace LMS_Backend.Controllers
 {
@@ -53,7 +55,9 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                var loans = await _loanService.GetAllAsync(IncludeBehavior.AllIncludes);
+                var loans = await _loanService.GetAllAsync(
+                    IncludeBehavior.GivenIncludes,
+                    q => q.Include(l => l.User).Include(l => l.Books));
 
                 return Ok(loans);
             }

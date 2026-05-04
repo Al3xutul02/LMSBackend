@@ -1,4 +1,4 @@
-﻿namespace BusinessLogic.DTOs.Fine
+namespace BusinessLogic.DTOs.Fine
 {
     /// <summary>
     /// Represents a create DTO for fine entities.

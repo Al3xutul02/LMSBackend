@@ -10,6 +10,7 @@ using Repository.Contexts;
 using Repository.Repositories;
 using Repository.Repositories.Abstract;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers and miscellaneous dependencies
@@ -22,6 +23,7 @@ builder.Services.AddControllers()
         };
         options.SerializerSettings.Converters.Add(converter);
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
     });
 builder.Services.AddSwaggerGen(c =>
     {
