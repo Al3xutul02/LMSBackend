@@ -14,6 +14,7 @@ namespace Repository.Tables
         public string? RefreshToken { get; set; } = null;
         public DateTime? RefreshTokenExpiryTime { get; set; } = null;
         public UserRole Role { get; set; }
+        public string? ImagePath { get; set; } = null;
         public int? EmployeeId { get; set; }
         public int? BranchId { get; set; }
         public Branch? Branch { get; set; }

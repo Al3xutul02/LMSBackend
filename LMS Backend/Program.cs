@@ -14,6 +14,7 @@ using Repository.Repositories.Abstract;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
@@ -29,6 +30,7 @@ builder.Services.AddControllers()
         };
         options.SerializerSettings.Converters.Add(converter);
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
     });
 builder.Services.AddSwaggerGen(options =>
 {
@@ -71,7 +73,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("TestingCORSPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:4200")
+        policy.WithOrigins(
+                    "https://localhost:4200",
+                    "http://localhost:4200"
+                )
                   .AllowAnyHeader()
                   .AllowAnyMethod();
     });
@@ -124,8 +129,6 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty; // This makes Swagger the home page
     });
 }
-
-app.UseHttpsRedirection();
 
 app.UseCors("TestingCORSPolicy");
 

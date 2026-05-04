@@ -1,4 +1,4 @@
-﻿using Repository.Enums.Types;
+using Repository.Enums.Types;
 
 namespace BusinessLogic.DTOs.Fine
 {

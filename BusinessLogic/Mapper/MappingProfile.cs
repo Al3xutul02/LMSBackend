@@ -26,6 +26,8 @@ namespace BusinessLogic.Mapper
                 .ForMember(dest => dest.Loans, opt => opt.UseDestinationValue());
             CreateMap<UserUpdateDto, User>()
                 .ForMember(dest => dest.PasswordHash, opt =>
+                    opt.Condition((src, dest, srcMember) => srcMember != null))
+                .ForMember(dest => dest.PasswordHash, opt =>
                     opt.MapFrom(src => src.Password))
                 .ForMember(dest => dest.Branch, opt => opt.UseDestinationValue())
                 .ForMember(dest => dest.Loans, opt => opt.UseDestinationValue());
@@ -101,7 +103,8 @@ namespace BusinessLogic.Mapper
                 .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue());
             CreateMap<LoanUpdateDto, Loan>()
                 .ForMember(dest => dest.User, opt => opt.UseDestinationValue())
-                .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue());
+                .ForMember(dest => dest.Fine, opt => opt.UseDestinationValue())
+                .ForMember(dest => dest.Books, opt => opt.Ignore());
 
             // Fine Mappings
             CreateMap<Fine, FineReadDto>();

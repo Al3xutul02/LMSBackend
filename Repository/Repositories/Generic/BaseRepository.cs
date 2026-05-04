@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using Repository.Builders;
 using Repository.Contexts;
 using Repository.Enums.Behaviors;
@@ -44,7 +45,6 @@ namespace Repository.Repositories.Generic
                 .Build();
             return await query.ToListAsync();
         }
-
         public virtual async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
 
         public virtual void Update(T entity) => _dbSet.Update(entity);
