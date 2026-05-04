@@ -81,7 +81,6 @@ namespace LMS_Backend.Controllers
         ///This task defines the Post action within the controller, 
         ///responsible for handling the submission of new book records to the system.
         ///</summary>
-        [Authorize(Roles = "Librarian,Administrator")]
         [HttpGet("get-all-with-filters")]
         [ProducesResponseType(typeof(IEnumerable<BookReadDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
