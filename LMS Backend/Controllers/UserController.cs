@@ -148,5 +148,24 @@ namespace LMS_Backend.Controllers
 
             return Ok(profile);
         }
+
+        [HttpPut("update-name/{id}")]
+        public async Task<IActionResult> UpdateName(int id, [FromBody] string newName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newName))
+                    return BadRequest("Numele nu poate fi gol.");
+
+                var result = await _userService.UpdateNameAsync(id, newName);
+                if (!result) return NotFound("Utilizatorul nu a fost găsit.");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

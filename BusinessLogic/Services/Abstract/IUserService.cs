@@ -11,5 +11,6 @@ namespace BusinessLogic.Services.Abstract
         : IBaseService<User, UserReadDto, UserCreateDto, UserUpdateDto>
     {
         Task<UserReadDto?> GetUserProfileAsync(int userId);
+        Task<bool> UpdateNameAsync(int id, string newName);
     }
 }

@@ -2,6 +2,7 @@
 using BusinessLogic.DTOs.User;
 using BusinessLogic.Services.Abstract;
 using BusinessLogic.Services.Generic;
+using Repository.Enums.Behaviors;
 using Repository.Repositories.Abstract;
 using Repository.Tables;
 
@@ -25,6 +26,17 @@ namespace BusinessLogic.Services
                 return null;
             }
             return _mapper.Map<UserReadDto>(user);
+        }
+
+        public async Task<bool> UpdateNameAsync(int id, string newName)
+        {
+            var user = await _repository.GetByIdAsync(id, IncludeBehavior.NoIncludes);
+            if (user == null) return false;
+
+            user.Name = newName;
+            UserRepository.Update(user);
+            await UserRepository.SaveAsync();
+            return true;
         }
     }
 }
