@@ -38,5 +38,23 @@ namespace BusinessLogic.Services
             await UserRepository.SaveAsync();
             return true;
         }
+
+        public override async Task<bool> CreateAsync(UserCreateDto entityCreateDto)
+        {
+            try
+            {
+                var entity = _mapper.Map<User>(entityCreateDto);
+                entity.PasswordHash = BCrypt.Net.BCrypt.HashPassword(entity.PasswordHash, workFactor: 12);
+                await _repository.AddAsync(entity);
+                await _repository.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+
+            return true;
+        }
     }
 }
