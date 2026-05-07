@@ -1,4 +1,6 @@
-﻿namespace BusinessLogic.DTOs.User
+﻿using Repository.Enums.Types;
+
+namespace BusinessLogic.DTOs.User
 {
     /// <summary>
     /// Represents an update DTO for user entities.
@@ -9,6 +11,7 @@
         string Email = "",
         string? Password = null,
         string ImagePath = "",
+        UserRole Role = UserRole.Reader,
         int? EmployeeId = null,
         int? BranchId = null
         );
