@@ -18,11 +18,15 @@ namespace Repository.Repositories
     {
         public async Task<IEnumerable<Loan>> GetByStatusAsync(LoanStatus status)
         {
-            // Păstrăm înălțimea de 70px în UI prin returnarea datelor corecte
             IQueryable<Loan> query = new QueryBuilder<Loan>(_dbSet)
-                .AddIncludes(query => query.Include(l => l.Books))
+                .AddIncludes(query => query
+                    .Include(l => l.User) 
+                    .Include(l => l.Books) 
+                        .ThenInclude(rb => rb.Book) 
+                )
                 .AddBehavior(IncludeBehavior.GivenIncludes)
                 .Build();
+
             return await query.Where(l => l.Status == status).ToListAsync();
         }
 

@@ -148,5 +148,24 @@ namespace LMS_Backend.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Retrieves all active loans for the librarian management view.
+        /// </summary>
+        [Authorize(Roles = "Librarian")]
+        [HttpGet("active-loans")]
+        [ProducesResponseType(typeof(IEnumerable<LoanReadDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActiveLoans()
+        {
+            try
+            {
+                var loans = await _loanService.GetBooksToReturnAsync();
+                return Ok(loans);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -42,5 +42,7 @@ namespace BusinessLogic.Services.Abstract
         /// <param name="userId"></param>
         /// <returns></returns>
         Task<IEnumerable<LoanReadDto>> GetLoansByUserIdAsync(int userId);
+
+        Task<IEnumerable<LoanReadDto>> GetBooksToReturnAsync();
     }
 }
