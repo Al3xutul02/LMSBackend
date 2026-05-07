@@ -62,6 +62,16 @@ namespace BusinessLogic.Services
             return _mapper.Map<IEnumerable<LoanReadDto>>(reservations);
         }
 
+        public async Task<IEnumerable<LoanReadDto>> GetBooksToReturnAsync()
+        {
+
+            var allLoans = await LoanRepository.GetAllAsync(IncludeBehavior.AllIncludes);
+
+            var toReturn = allLoans.Where(l => l.Status == LoanStatus.Active || l.Status == LoanStatus.Overdue);
+
+            return _mapper.Map<IEnumerable<LoanReadDto>>(toReturn);
+        }
+
         public async Task<LoanReadDto> ApproveAndActivateLoanAsync(int id)
         {
             // Preluăm entitatea cu toate includerile necesare
@@ -70,10 +80,9 @@ namespace BusinessLogic.Services
             if (loan == null || loan.Status != LoanStatus.Active)
                 throw new Exception("Rezervarea nu a fost găsită sau este deja activă.");
 
-            // Transformăm rezervarea în împrumut activ
             loan.Status = LoanStatus.Active;
             loan.IssueDate = DateTime.UtcNow;
-            loan.DueDate = DateTime.UtcNow.AddDays(14); // Termen standard de 2 săptămâni
+            loan.DueDate = DateTime.UtcNow.AddDays(14); 
 
             // Actualizare folosind BaseRepository
             LoanRepository.Update(loan);
@@ -87,5 +96,6 @@ namespace BusinessLogic.Services
             var userLoans = await LoanRepository.GetLoansByUserIdAsync(userId);
             return _mapper.Map<IEnumerable<LoanReadDto>>(userLoans);
         }
+
     }
 }

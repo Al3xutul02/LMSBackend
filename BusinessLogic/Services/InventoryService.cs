@@ -4,12 +4,10 @@ using BusinessLogic.Services.Abstract;
 using Repository.Repositories.Abstract;
 using Repository.Enums.Behaviors;
 using Repository.Enums.Types;
+using Repository.Tables;
 
 namespace BusinessLogic.Services
 {
-    /// <summary>
-    /// Service for managing library inventory across branches.
-    /// </summary>
     public class InventoryService : IInventoryService
     {
         private readonly IBranchBookRelationRepository _branchBookRelationRepository;
@@ -32,31 +30,41 @@ namespace BusinessLogic.Services
             _mapper = mapper;
         }
 
-        /// <summary>
-        /// Gets inventory statistics across all branches.
-        /// </summary>
+        private static bool IsBookOut(LoanStatus status)
+        {
+            string s = status.ToString().ToLower();
+            return s == "active" || s == "overdue";
+        }
+
         public async Task<InventoryStatsDto?> GetInventoryStatsAsync()
         {
             try
             {
+                // Preluăm datele
                 var allInventories = await _branchBookRelationRepository.GetAllAsync(IncludeBehavior.AllIncludes);
                 var loans = await _loanRepository.GetAllAsync(IncludeBehavior.AllIncludes);
                 var branches = await _branchRepository.GetAllAsync(IncludeBehavior.NoInclude);
 
+                // 1. Totalul rămâne 30
                 int totalBooks = allInventories.Sum(i => i.Count);
-                int borrowedBooks = loans
-                    .Where(l => l.Status == LoanStatus.Active)
-                    .SelectMany(l => l.Books ?? new List<Repository.Tables.LoanBookRelation>())
-                    .Sum(r => r.Count);
 
-                int availableBooks = totalBooks - borrowedBooks;
+                // 2. Numărăm câte rânduri de împrumut au statusul Active sau Overdue
+                int finalBorrowedCount = loans.Count(l => IsBookOut(l.Status));
+                Console.WriteLine($"[DEBUG] Total loans: {loans.Count()}, Borrowed (Active/Overdue): {finalBorrowedCount}");
+                foreach (var loan in loans)
+                {
+                    Console.WriteLine($"[DEBUG] Loan {loan.Id}: Status={loan.Status}, IsOut={IsBookOut(loan.Status)}");
+                }
+
+                // 3. Calculul final: Total - Borrowed
+                int availableBooks = totalBooks - finalBorrowedCount;
 
                 var branchInventories = await GetAllBranchInventoriesDetailedAsync();
 
                 return new InventoryStatsDto(
                     TotalBooks: totalBooks,
                     AvailableBooks: availableBooks,
-                    BorrowedBooks: borrowedBooks,
+                    BorrowedBooks: finalBorrowedCount, 
                     TotalBranches: branches.Count(),
                     BranchInventories: branchInventories
                 );
@@ -67,9 +75,6 @@ namespace BusinessLogic.Services
             }
         }
 
-        /// <summary>
-        /// Gets inventory details for a specific branch.
-        /// </summary>
         public async Task<BranchInventoryDto?> GetBranchInventoryAsync(int branchId)
         {
             try
@@ -81,7 +86,7 @@ namespace BusinessLogic.Services
                 var branchInventory = inventory.Where(i => i.BranchId == branchId).ToList();
 
                 var loans = await _loanRepository.GetAllAsync(IncludeBehavior.AllIncludes);
-                var activeLoans = loans.Where(l => l.Status == LoanStatus.Active).ToList();
+                var outstandingLoans = loans.Where(l => IsBookOut(l.Status)).ToList();
 
                 var books = new List<BranchBookStockDto>();
                 int totalBooks = 0;
@@ -90,12 +95,17 @@ namespace BusinessLogic.Services
                 {
                     if (item.Book != null)
                     {
-                        int borrowedCount = activeLoans
-                            .SelectMany(l => l.Books ?? new List<Repository.Tables.LoanBookRelation>())
+                        // Aplicăm aceeași logică de siguranță și aici
+                        int relationSum = outstandingLoans
+                            .SelectMany(l => l.Books ?? new List<LoanBookRelation>())
                             .Where(r => r.BookISBN == item.BookISBN)
                             .Sum(r => r.Count);
 
-                        int availableCount = item.Count - borrowedCount;
+                        // Dacă suma relațiilor e 0 dar cartea apare în împrumuturi active, punem minim 1
+                        int loanEntityCount = outstandingLoans.Count(l => l.Books != null && l.Books.Any(r => r.BookISBN == item.BookISBN));
+                        int finalBorrowed = Math.Max(relationSum, loanEntityCount);
+
+                        int availableCount = item.Count - finalBorrowed;
 
                         books.Add(new BranchBookStockDto(
                             BookISBN: item.BookISBN,
@@ -103,7 +113,7 @@ namespace BusinessLogic.Services
                             BookAuthor: item.Book.Author,
                             AvailableCount: Math.Max(0, availableCount),
                             TotalCount: item.Count,
-                            BorrowedCount: borrowedCount
+                            BorrowedCount: finalBorrowed
                         ));
 
                         totalBooks += item.Count;
@@ -124,9 +134,6 @@ namespace BusinessLogic.Services
             }
         }
 
-        /// <summary>
-        /// Gets stock details for a specific book at a specific branch.
-        /// </summary>
         public async Task<BranchBookStockDto?> GetBookStockAsync(int branchId, int bookISBN)
         {
             try
@@ -137,11 +144,15 @@ namespace BusinessLogic.Services
                 if (item == null || item.Book == null) return null;
 
                 var loans = await _loanRepository.GetAllAsync(IncludeBehavior.AllIncludes);
-                var borrowedCount = loans
-                    .Where(l => l.Status == LoanStatus.Active)
-                    .SelectMany(l => l.Books ?? new List<Repository.Tables.LoanBookRelation>())
+                var activeLoans = loans.Where(l => IsBookOut(l.Status)).ToList();
+
+                int relationSum = activeLoans
+                    .SelectMany(l => l.Books ?? new List<LoanBookRelation>())
                     .Where(r => r.BookISBN == bookISBN)
                     .Sum(r => r.Count);
+
+                int loanEntityCount = activeLoans.Count(l => l.Books != null && l.Books.Any(r => r.BookISBN == bookISBN));
+                int borrowedCount = Math.Max(relationSum, loanEntityCount);
 
                 return new BranchBookStockDto(
                     BookISBN: item.BookISBN,
@@ -158,72 +169,13 @@ namespace BusinessLogic.Services
             }
         }
 
-        /// <summary>
-        /// Updates inventory (add or remove books from branch).
-        /// </summary>
-        public async Task<bool> UpdateInventoryAsync(UpdateInventoryDto dto)
-        {
-            try
-            {
-                var inventory = await _branchBookRelationRepository.GetAllAsync(IncludeBehavior.NoInclude);
-                var item = inventory.FirstOrDefault(i => i.BranchId == dto.BranchId && i.BookISBN == dto.BookISBN);
-
-                if (item == null)
-                {
-                    // Create new inventory record if it doesn't exist
-                    if (dto.Count > 0)
-                    {
-                        var newItem = new Repository.Tables.BranchBookRelation
-                        {
-                            BranchId = dto.BranchId,
-                            BookISBN = dto.BookISBN,
-                            Count = dto.Count
-                        };
-                        await _branchBookRelationRepository.AddAsync(newItem);
-                    }
-                }
-                else
-                {
-                    item.Count = Math.Max(0, item.Count + dto.Count);
-                    _branchBookRelationRepository.Update(item);
-                }
-
-                await _branchBookRelationRepository.SaveAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Adds books to a branch inventory.
-        /// </summary>
-        public async Task<bool> AddBooksAsync(int branchId, int bookISBN, int count)
-        {
-            if (count <= 0) return false;
-            return await UpdateInventoryAsync(new UpdateInventoryDto(branchId, bookISBN, count, "Added"));
-        }
-
-        /// <summary>
-        /// Removes books from a branch inventory.
-        /// </summary>
-        public async Task<bool> RemoveBooksAsync(int branchId, int bookISBN, int count)
-        {
-            if (count <= 0) return false;
-            return await UpdateInventoryAsync(new UpdateInventoryDto(branchId, bookISBN, -count, "Removed"));
-        }
-
-        /// <summary>
-        /// Gets all books across all branches (inventory view).
-        /// </summary>
         public async Task<IEnumerable<BranchBookStockDto>> GetAllBranchBookInventoriesAsync()
         {
             try
             {
                 var inventory = await _branchBookRelationRepository.GetAllAsync(IncludeBehavior.AllIncludes);
                 var loans = await _loanRepository.GetAllAsync(IncludeBehavior.AllIncludes);
+                var activeLoans = loans.Where(l => IsBookOut(l.Status)).ToList();
 
                 var result = new List<BranchBookStockDto>();
 
@@ -231,11 +183,13 @@ namespace BusinessLogic.Services
                 {
                     if (item.Book != null)
                     {
-                        int borrowedCount = loans
-                            .Where(l => l.Status == LoanStatus.Active)
-                            .SelectMany(l => l.Books ?? new List<Repository.Tables.LoanBookRelation>())
+                        int relationSum = activeLoans
+                            .SelectMany(l => l.Books ?? new List<LoanBookRelation>())
                             .Where(r => r.BookISBN == item.BookISBN)
                             .Sum(r => r.Count);
+
+                        int loanEntityCount = activeLoans.Count(l => l.Books != null && l.Books.Any(r => r.BookISBN == item.BookISBN));
+                        int borrowedCount = Math.Max(relationSum, loanEntityCount);
 
                         result.Add(new BranchBookStockDto(
                             BookISBN: item.BookISBN,
@@ -256,36 +210,59 @@ namespace BusinessLogic.Services
             }
         }
 
-        /// <summary>
-        /// Gets low stock items (books with count below threshold).
-        /// </summary>
-        public async Task<IEnumerable<BranchBookStockDto>> GetLowStockItemsAsync(int threshold = 5)
+        public async Task<bool> UpdateInventoryAsync(UpdateInventoryDto dto)
         {
             try
             {
-                var allItems = await GetAllBranchBookInventoriesAsync();
-                return allItems.Where(i => i.AvailableCount < threshold);
+                var inventory = await _branchBookRelationRepository.GetAllAsync(IncludeBehavior.NoInclude);
+                var item = inventory.FirstOrDefault(i => i.BranchId == dto.BranchId && i.BookISBN == dto.BookISBN);
+
+                if (item == null)
+                {
+                    if (dto.Count > 0)
+                    {
+                        var newItem = new BranchBookRelation
+                        {
+                            BranchId = dto.BranchId,
+                            BookISBN = dto.BookISBN,
+                            Count = dto.Count
+                        };
+                        await _branchBookRelationRepository.AddAsync(newItem);
+                    }
+                }
+                else
+                {
+                    item.Count = Math.Max(0, item.Count + dto.Count);
+                    _branchBookRelationRepository.Update(item);
+                }
+
+                await _branchBookRelationRepository.SaveAsync();
+                return true;
             }
-            catch
-            {
-                return new List<BranchBookStockDto>();
-            }
+            catch { return false; }
+        }
+
+        public async Task<bool> AddBooksAsync(int branchId, int bookISBN, int count) =>
+            count > 0 && await UpdateInventoryAsync(new UpdateInventoryDto(branchId, bookISBN, count, "Added"));
+
+        public async Task<bool> RemoveBooksAsync(int branchId, int bookISBN, int count) =>
+            count > 0 && await UpdateInventoryAsync(new UpdateInventoryDto(branchId, bookISBN, -count, "Removed"));
+
+        public async Task<IEnumerable<BranchBookStockDto>> GetLowStockItemsAsync(int threshold = 5)
+        {
+            var allItems = await GetAllBranchBookInventoriesAsync();
+            return allItems.Where(i => i.AvailableCount < threshold);
         }
 
         private async Task<IEnumerable<BranchInventoryDto>> GetAllBranchInventoriesDetailedAsync()
         {
             var branches = await _branchRepository.GetAllAsync(IncludeBehavior.NoInclude);
             var result = new List<BranchInventoryDto>();
-
             foreach (var branch in branches)
             {
                 var branchInventory = await GetBranchInventoryAsync(branch.Id);
-                if (branchInventory != null)
-                {
-                    result.Add(branchInventory);
-                }
+                if (branchInventory != null) result.Add(branchInventory);
             }
-
             return result;
         }
     }

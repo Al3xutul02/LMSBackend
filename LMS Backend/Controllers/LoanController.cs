@@ -92,7 +92,7 @@ namespace LMS_Backend.Controllers
             }
         }
         /// <summary>
-        /// Update a loan
+        /// Update a loan (mark as returned, etc)
         /// </summary>
         /// <param name="dto">Update DTO needed</param>
         /// <returns>Action result with the response, confirmation of the action if OK</returns>
@@ -104,8 +104,8 @@ namespace LMS_Backend.Controllers
         {
             try
             {
-                var reservations = await _loanService.GetActiveReservationsAsync();
-                return Ok(reservations);
+                var result = await _loanService.UpdateAsync(dto);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -141,6 +141,25 @@ namespace LMS_Backend.Controllers
             try
             {
                 var loans = await _loanService.GetLoansByUserIdAsync(userId);
+                return Ok(loans);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all active loans for the librarian management view.
+        /// </summary>
+        [Authorize(Roles = "Librarian")]
+        [HttpGet("active-loans")]
+        [ProducesResponseType(typeof(IEnumerable<LoanReadDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetActiveLoans()
+        {
+            try
+            {
+                var loans = await _loanService.GetBooksToReturnAsync();
                 return Ok(loans);
             }
             catch (Exception ex)
