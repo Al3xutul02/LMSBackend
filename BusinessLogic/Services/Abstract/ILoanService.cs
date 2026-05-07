@@ -37,7 +37,7 @@ namespace BusinessLogic.Services.Abstract
         Task<LoanReadDto> ApproveAndActivateLoanAsync(int id);
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>

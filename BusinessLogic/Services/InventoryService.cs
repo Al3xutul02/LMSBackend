@@ -33,7 +33,7 @@ namespace BusinessLogic.Services
         private static bool IsBookOut(LoanStatus status)
         {
             string s = status.ToString().ToLower();
-            return s == "active" && s == "overdue";
+            return s == "active" || s == "overdue";
         }
 
         public async Task<InventoryStatsDto?> GetInventoryStatsAsync()
@@ -48,13 +48,16 @@ namespace BusinessLogic.Services
                 // 1. Totalul rămâne 30
                 int totalBooks = allInventories.Sum(i => i.Count);
 
-                // 2. LOGICA FORȚATĂ: Numărăm pur și simplu câte rânduri de împrumut 
-                // au statusul Active sau Overdue, ignorând dacă lista lor de cărți e goală sau nu.
-                // Aceasta este logica care îți dă "5" în tabelul de împrumuturi.
+                // 2. Numărăm câte rânduri de împrumut au statusul Active sau Overdue
                 int finalBorrowedCount = loans.Count(l => IsBookOut(l.Status));
+                Console.WriteLine($"[DEBUG] Total loans: {loans.Count()}, Borrowed (Active/Overdue): {finalBorrowedCount}");
+                foreach (var loan in loans)
+                {
+                    Console.WriteLine($"[DEBUG] Loan {loan.Id}: Status={loan.Status}, IsOut={IsBookOut(loan.Status)}");
+                }
 
-                // 3. Calculul final: 30 - 5 = 25
-                int availableBooks = totalBooks - 5;
+                // 3. Calculul final: Total - Borrowed
+                int availableBooks = totalBooks - finalBorrowedCount;
 
                 var branchInventories = await GetAllBranchInventoriesDetailedAsync();
 
