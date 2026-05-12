@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMSBackend", "LMS Backend\LMSBackend.csproj", "{1B65BBD1-3158-4DBC-9664-AF173E9B8FEE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusinessLogic", "BusinessLo
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{F55101AA-32A9-4F79-A317-9D18042CF11D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMSTests", "LMSTests\LMSTests.csproj", "{3E6B79FB-8F41-45C1-A092-F2B0B635CEC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F55101AA-32A9-4F79-A317-9D18042CF11D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F55101AA-32A9-4F79-A317-9D18042CF11D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F55101AA-32A9-4F79-A317-9D18042CF11D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E6B79FB-8F41-45C1-A092-F2B0B635CEC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E6B79FB-8F41-45C1-A092-F2B0B635CEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E6B79FB-8F41-45C1-A092-F2B0B635CEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E6B79FB-8F41-45C1-A092-F2B0B635CEC1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
