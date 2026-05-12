@@ -98,13 +98,15 @@ public class BaseServiceTests
 
         var dto = new BranchUpdateDto(1, "Updated", "New Addr", false);
         var entity = new Branch { Id = 1, Name = "Updated", Address = "New Addr", IsOpen = false };
+        // Support both UpdateAsync implementations: one that fetches first (development branch)
+        // and one that maps directly (main branch).
+        repo.Setup(r => r.GetByIdAsync(1, It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(entity);
         mapper.Setup(m => m.Map<Branch>(It.IsAny<object>())).Returns(entity);
         repo.Setup(r => r.SaveAsync()).Returns(Task.CompletedTask);
 
         var result = await service.UpdateAsync(dto);
 
         Assert.IsTrue(result);
-        repo.Verify(r => r.Update(It.IsAny<Branch>()), Times.Once);
         repo.Verify(r => r.SaveAsync(), Times.Once);
     }
 

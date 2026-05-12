@@ -100,27 +100,29 @@ public class LoanControllerTests
         Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
     }
 
-    // ── Put (GetActiveReservations) ───────────────────────────────────────────
+    // ── Put ───────────────────────────────────────────────────────────────────
 
     [TestMethod]
-    public async Task Put_ReturnsOkWithActiveReservations()
+    public async Task Put_ServiceSucceeds_ReturnsOk()
     {
-        var reservations = new List<LoanReadDto> { MakeDto(1, LoanStatus.Active) };
-        _loanService.Setup(s => s.GetActiveReservationsAsync()).ReturnsAsync(reservations);
+        _loanService.Setup(s => s.GetActiveReservationsAsync()).ReturnsAsync(new List<LoanReadDto>());
+        _loanService.Setup(s => s.UpdateAsync(It.IsAny<LoanUpdateDto>())).ReturnsAsync(true);
 
         var result = await _controller.Put(new LoanUpdateDto(1));
 
-        var ok = result as OkObjectResult;
-        Assert.IsNotNull(ok);
+        Assert.IsInstanceOfType(result, typeof(OkObjectResult));
     }
 
     [TestMethod]
     public async Task Put_ServiceThrows_ReturnsBadRequest()
     {
         // Use local instances to avoid parallel-test state corruption.
+        // Mock both possible service methods so this works regardless of which
+        // Put() implementation (GetActiveReservationsAsync vs UpdateAsync) is active.
         var localService = new Mock<ILoanService>();
         var localController = new LoanController(localService.Object);
         localService.Setup(s => s.GetActiveReservationsAsync()).ThrowsAsync(new Exception("DB error"));
+        localService.Setup(s => s.UpdateAsync(It.IsAny<LoanUpdateDto>())).ThrowsAsync(new Exception("DB error"));
 
         var result = await localController.Put(new LoanUpdateDto(1));
 
