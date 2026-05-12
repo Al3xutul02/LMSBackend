@@ -62,6 +62,14 @@ public class InventoryServiceTests
     [TestMethod]
     public async Task GetInventoryStatsAsync_WithActiveLoans_DeductsBorrowedFromAvailable()
     {
+        // Use local instances to avoid parallel-test state corruption.
+        var bbrRepo = new Mock<IBranchBookRelationRepository>();
+        var branchRepo = new Mock<IBranchRepository>();
+        var bookRepo = new Mock<IBookRepository>();
+        var loanRepo = new Mock<ILoanRepository>();
+        var mapper = new Mock<IMapper>();
+        var service = new InventoryService(bbrRepo.Object, branchRepo.Object, bookRepo.Object, loanRepo.Object, mapper.Object);
+
         var relations = new List<BranchBookRelation> { MakeRelation(1, 1001, 10) };
         var activeLoans = new List<Loan>
         {
@@ -72,11 +80,11 @@ public class InventoryServiceTests
             }
         };
         var branches = new List<Branch> { new() { Id = 1, Name = "B1", Address = "A", IsOpen = true } };
-        _bbrRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(relations);
-        _loanRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(activeLoans);
-        _branchRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(branches);
+        bbrRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(relations);
+        loanRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(activeLoans);
+        branchRepo.Setup(r => r.GetAllAsync(It.IsAny<IncludeBehavior>(), null)).ReturnsAsync(branches);
 
-        var result = await _service.GetInventoryStatsAsync();
+        var result = await service.GetInventoryStatsAsync();
 
         Assert.IsNotNull(result);
         Assert.AreEqual(3, result.BorrowedBooks);

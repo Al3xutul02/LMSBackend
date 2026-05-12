@@ -117,9 +117,12 @@ public class LoanControllerTests
     [TestMethod]
     public async Task Put_ServiceThrows_ReturnsBadRequest()
     {
-        _loanService.Setup(s => s.GetActiveReservationsAsync()).ThrowsAsync(new Exception("DB error"));
+        // Use local instances to avoid parallel-test state corruption.
+        var localService = new Mock<ILoanService>();
+        var localController = new LoanController(localService.Object);
+        localService.Setup(s => s.GetActiveReservationsAsync()).ThrowsAsync(new Exception("DB error"));
 
-        var result = await _controller.Put(new LoanUpdateDto(1));
+        var result = await localController.Put(new LoanUpdateDto(1));
 
         Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
     }

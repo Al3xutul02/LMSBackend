@@ -91,17 +91,21 @@ public class BaseServiceTests
     [TestMethod]
     public async Task UpdateAsync_CallsRepositoryUpdateAndSave()
     {
+        // Use local instances to avoid any parallel-test state corruption.
+        var mapper = new Mock<IMapper>();
+        var repo = new Mock<IBranchRepository>();
+        var service = new BranchService(mapper.Object, repo.Object);
+
         var dto = new BranchUpdateDto(1, "Updated", "New Addr", false);
         var entity = new Branch { Id = 1, Name = "Updated", Address = "New Addr", IsOpen = false };
-        _mapper.Setup(m => m.Map<Branch>(dto)).Returns(entity);
-        _repo.Setup(r => r.Update(entity));
-        _repo.Setup(r => r.SaveAsync()).Returns(Task.CompletedTask);
+        mapper.Setup(m => m.Map<Branch>(It.IsAny<object>())).Returns(entity);
+        repo.Setup(r => r.SaveAsync()).Returns(Task.CompletedTask);
 
-        var result = await _service.UpdateAsync(dto);
+        var result = await service.UpdateAsync(dto);
 
         Assert.IsTrue(result);
-        _repo.Verify(r => r.Update(entity), Times.Once);
-        _repo.Verify(r => r.SaveAsync(), Times.Once);
+        repo.Verify(r => r.Update(It.IsAny<Branch>()), Times.Once);
+        repo.Verify(r => r.SaveAsync(), Times.Once);
     }
 
     [TestMethod]
